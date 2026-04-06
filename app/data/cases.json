@@ -1,0 +1,439 @@
+{
+  "task1": [
+    {
+      "case_id": "T1_001",
+      "grievance_text": "I am a farmer from Lucknow, Uttar Pradesh. I have not received my PM-KISAN installment for the last 6 months. My bank account is linked but I have not received any payment.",
+      "scheme": "PM-KISAN",
+      "beneficiary": {
+        "name": "Ram Kumar",
+        "state": "Uttar Pradesh",
+        "district": "Lucknow",
+        "age": 52,
+        "occupation": "Farmer"
+      },
+      "ground_truth": {
+        "cause": "aadhaar_not_seeded",
+        "resolution": "seed_aadhaar"
+      },
+      "question_answers": {
+        "Q01": "Yes, the bank account appears linked in the portal.",
+        "Q02": "Yes, the account number and IFSC code are correct.",
+        "Q03": "Yes, the bank account is active.",
+        "Q06": "No, Aadhaar has NOT been seeded/linked with PM-KISAN.",
+        "Q07": "Yes, the name in Aadhaar matches the records.",
+        "Q08": "Yes, the Aadhaar is active with UIDAI.",
+        "Q09": "No, eKYC has not been completed on the PM-KISAN portal.",
+        "Q14": "Yes, the beneficiary is registered in PM-KISAN.",
+        "Q34": "The last payment was received 6 months ago, before the eKYC mandate.",
+        "Q43": "Yes, the name on the PM-KISAN portal is correct.",
+        "Q44": "No, eKYC has not been completed on the PM-KISAN farmer portal.",
+        "Q47": "Yes, DBT is enabled on the bank account.",
+        "Q48": "Bank passbook shows no PM-KISAN credit for the last 6 months."
+      },
+      "difficulty": "easy"
+    },
+    {
+      "case_id": "T1_002",
+      "grievance_text": "I am a farmer from Muzaffarpur, Bihar. I registered for PM-KISAN last year but have never received a single installment. I completed all paperwork at the CSC.",
+      "scheme": "PM-KISAN",
+      "beneficiary": {
+        "name": "Sunita Devi",
+        "state": "Bihar",
+        "district": "Muzaffarpur",
+        "age": 45,
+        "occupation": "Farmer"
+      },
+      "ground_truth": {
+        "cause": "bank_account_not_linked",
+        "resolution": "link_bank_account"
+      },
+      "question_answers": {
+        "Q01": "No, the bank account has NOT been linked to PM-KISAN for DBT.",
+        "Q06": "Yes, Aadhaar is seeded with the scheme.",
+        "Q09": "Yes, eKYC was completed at the CSC.",
+        "Q14": "Yes, the beneficiary is registered in PM-KISAN.",
+        "Q34": "No payment has ever been received since registration.",
+        "Q44": "Yes, eKYC was done.",
+        "Q47": "No, DBT has not been activated as bank is not linked.",
+        "Q48": "Bank passbook shows no PM-KISAN credit ever."
+      },
+      "difficulty": "easy"
+    },
+    {
+      "case_id": "T1_003",
+      "grievance_text": "I am a farmer from Ajmer, Rajasthan. I was receiving PM-KISAN payments regularly but they stopped 8 months ago. My bank was merged with another bank recently.",
+      "scheme": "PM-KISAN",
+      "beneficiary": {
+        "name": "Mohan Lal",
+        "state": "Rajasthan",
+        "district": "Ajmer",
+        "age": 58,
+        "occupation": "Farmer"
+      },
+      "ground_truth": {
+        "cause": "incorrect_bank_details",
+        "resolution": "update_bank_details"
+      },
+      "question_answers": {
+        "Q01": "Yes, bank account appears linked.",
+        "Q02": "No, the IFSC code is outdated — the bank branch was merged and the IFSC changed.",
+        "Q03": "Yes, the new merged account is active.",
+        "Q06": "Yes, Aadhaar is seeded.",
+        "Q09": "Yes, eKYC completed.",
+        "Q14": "Yes, registered in PM-KISAN.",
+        "Q34": "Last payment received 8 months ago, before the bank merger.",
+        "Q35": "No official rejection notice received.",
+        "Q43": "Yes, name on PM-KISAN portal is correct.",
+        "Q48": "Bank passbook shows no PM-KISAN credit for 8 months despite active account."
+      },
+      "difficulty": "easy"
+    },
+    {
+      "case_id": "T1_004",
+      "grievance_text": "I am a farmer from Amritsar, Punjab. I received 2 installments of PM-KISAN but payments stopped after that. I have not changed my bank or any details.",
+      "scheme": "PM-KISAN",
+      "beneficiary": {
+        "name": "Ranjit Singh",
+        "state": "Punjab",
+        "district": "Amritsar",
+        "age": 48,
+        "occupation": "Farmer"
+      },
+      "ground_truth": {
+        "cause": "land_records_mismatch",
+        "resolution": "update_land_records"
+      },
+      "question_answers": {
+        "Q01": "Yes, bank is linked.",
+        "Q02": "Yes, bank details are correct.",
+        "Q06": "Yes, Aadhaar is seeded.",
+        "Q09": "Yes, eKYC completed.",
+        "Q12": "No, the land records in the Patwari office do not match the PM-KISAN portal entries — partial land was transferred after registration.",
+        "Q14": "Yes, registered in PM-KISAN.",
+        "Q34": "Received 2 installments, then payments stopped.",
+        "Q35": "Received a notice about land verification mismatch.",
+        "Q43": "Yes, name is correct."
+      },
+      "difficulty": "easy"
+    },
+    {
+      "case_id": "T1_005",
+      "grievance_text": "I am a farmer from Nalgonda, Telangana. My bank account is correct, my Aadhaar is seeded, but I have not received PM-KISAN payment for 4 months. The CSC confirmed all my details are fine.",
+      "scheme": "PM-KISAN",
+      "beneficiary": {
+        "name": "Lakshmi Bai",
+        "state": "Telangana",
+        "district": "Nalgonda",
+        "age": 44,
+        "occupation": "Farmer"
+      },
+      "ground_truth": {
+        "cause": "npci_mapping_error",
+        "resolution": "fix_npci_mapping"
+      },
+      "question_answers": {
+        "Q01": "Yes, bank account is linked.",
+        "Q02": "Yes, account number and IFSC are correct.",
+        "Q03": "Yes, account is active.",
+        "Q04": "No, NPCI Aadhaar mapper is routing to a previous account that was closed 6 months ago.",
+        "Q06": "Yes, Aadhaar is seeded.",
+        "Q09": "Yes, eKYC completed.",
+        "Q14": "Yes, registered.",
+        "Q34": "Last received 4 months ago.",
+        "Q47": "Yes, DBT is enabled.",
+        "Q48": "Bank passbook shows no PM-KISAN credit despite active account and correct details."
+      },
+      "difficulty": "easy"
+    }
+  ],
+  "task2": [
+    {
+      "case_id": "T2_001",
+      "grievance_text": "I am a 72-year-old retired teacher from Bhopal, Madhya Pradesh. I have been receiving old age pension for 3 years but it stopped 3 months ago without any reason.",
+      "scheme": "OAP",
+      "beneficiary": {
+        "name": "Girija Shankar",
+        "state": "Madhya Pradesh",
+        "district": "Bhopal",
+        "age": 72,
+        "occupation": "Retired"
+      },
+      "ground_truth": {
+        "cause": "life_certificate_pending",
+        "resolution": "submit_life_certificate"
+      },
+      "question_answers": {
+        "Q01": "Yes, bank account is linked and active.",
+        "Q03": "Yes, account is active.",
+        "Q21": "No, the system does not show the pensioner as deceased.",
+        "Q22": "Yes, DFC was submitted last year.",
+        "Q23": "No, the annual Jeevan Pramaan life certificate has NOT been submitted this year.",
+        "Q24": "No, no revision order.",
+        "Q34": "Received regularly until 3 months ago.",
+        "Q35": "Yes, received an SMS reminder about life certificate submission being overdue.",
+        "Q50": "Officer can confirm pensioner is alive."
+      },
+      "difficulty": "medium"
+    },
+    {
+      "case_id": "T2_002",
+      "grievance_text": "I am a 68-year-old widow from Varanasi, Uttar Pradesh. My old age pension stopped 2 months ago. I submitted my life certificate. I did not receive any communication about why it stopped.",
+      "scheme": "OAP",
+      "beneficiary": {
+        "name": "Asha Rani",
+        "state": "Uttar Pradesh",
+        "district": "Varanasi",
+        "age": 68,
+        "occupation": "Widow, pensioner"
+      },
+      "ground_truth": {
+        "cause": "pensioner_marked_deceased",
+        "resolution": "restore_live_status"
+      },
+      "question_answers": {
+        "Q01": "Yes, bank is linked.",
+        "Q03": "Yes, account is active.",
+        "Q21": "Yes, the system shows the pensioner as DECEASED — an error was reported.",
+        "Q22": "Yes, DFC was submitted.",
+        "Q23": "Yes, annual life certificate was submitted on time.",
+        "Q24": "No pension revision.",
+        "Q34": "Pension stopped abruptly 2 months ago.",
+        "Q35": "No official communication received explaining the stoppage.",
+        "Q50": "Officer confirmed the pensioner is alive and present at office."
+      },
+      "difficulty": "medium"
+    },
+    {
+      "case_id": "T2_003",
+      "grievance_text": "I am a 70-year-old pensioner from Patna, Bihar. My old age pension was rejected recently. I have been receiving it for 2 years. I received a notice mentioning some mismatch.",
+      "scheme": "OAP",
+      "beneficiary": {
+        "name": "Abdul Karim",
+        "state": "Bihar",
+        "district": "Patna",
+        "age": 70,
+        "occupation": "Retired"
+      },
+      "ground_truth": {
+        "cause": "aadhaar_mismatch",
+        "resolution": "correct_aadhaar_mismatch"
+      },
+      "question_answers": {
+        "Q01": "Yes, bank is linked.",
+        "Q06": "Yes, Aadhaar is seeded.",
+        "Q07": "No, the name in Aadhaar is spelled 'Abul Karim' but scheme records say 'Abdul Karim' — a mismatch during data re-verification.",
+        "Q09": "Yes, KYC was done earlier.",
+        "Q21": "No, not marked deceased.",
+        "Q23": "Yes, life certificate submitted.",
+        "Q34": "Received regularly for 2 years, then rejected.",
+        "Q35": "Yes, received a rejection notice citing name mismatch in Aadhaar."
+      },
+      "difficulty": "medium"
+    },
+    {
+      "case_id": "T2_004",
+      "grievance_text": "I am a 65-year-old widow from Ranchi, Jharkhand. I have been receiving widow pension for 1 year. Payments stopped 5 months ago. I have not changed any details.",
+      "scheme": "WAP",
+      "beneficiary": {
+        "name": "Pushpa Kumari",
+        "state": "Jharkhand",
+        "district": "Ranchi",
+        "age": 65,
+        "occupation": "Widow"
+      },
+      "ground_truth": {
+        "cause": "bank_account_frozen",
+        "resolution": "reactivate_bank_account"
+      },
+      "question_answers": {
+        "Q01": "Yes, bank account is linked.",
+        "Q02": "Yes, details are correct.",
+        "Q03": "No, the bank account has been FROZEN due to no transactions for over 12 months.",
+        "Q21": "No, not marked deceased.",
+        "Q23": "Yes, life certificate submitted.",
+        "Q24": "No revision.",
+        "Q34": "Last received 5 months ago.",
+        "Q35": "No notification.",
+        "Q48": "Bank passbook shows account was frozen — no credits possible."
+      },
+      "difficulty": "medium"
+    },
+    {
+      "case_id": "T2_005",
+      "grievance_text": "I am a 67-year-old from Raipur, Chhattisgarh. My old age pension was revised by the state government and since then I have been receiving only partial amounts or none at all for the past 2 months.",
+      "scheme": "OAP",
+      "beneficiary": {
+        "name": "Ramlal Verma",
+        "state": "Chhattisgarh",
+        "district": "Raipur",
+        "age": 67,
+        "occupation": "Retired"
+      },
+      "ground_truth": {
+        "cause": "district_level_pending",
+        "resolution": "follow_up_district_office"
+      },
+      "question_answers": {
+        "Q01": "Yes, bank is linked.",
+        "Q03": "Yes, account is active.",
+        "Q16": "Yes, revision application is currently under review.",
+        "Q18": "No, block office has already approved and forwarded.",
+        "Q19": "Yes, the revision approval is pending at the District Collector's office.",
+        "Q21": "No, not marked deceased.",
+        "Q23": "Yes, life certificate submitted.",
+        "Q24": "Yes, pension amount is under revision since the state government issued a new order.",
+        "Q34": "Received partial amount last month, nothing this month."
+      },
+      "difficulty": "medium"
+    }
+  ],
+  "task3": [
+    {
+      "case_id": "T3_001",
+      "grievance_text": "I am a MGNREGA worker from Sehore, Madhya Pradesh. I completed 30 days of work last month. The Gram Panchayat approved the work and the technical officer measured it, but I have not received wages.",
+      "scheme": "MGNREGA",
+      "beneficiary": {
+        "name": "Savita Bai",
+        "state": "Madhya Pradesh",
+        "district": "Sehore",
+        "age": 35,
+        "occupation": "MGNREGA labourer"
+      },
+      "ground_truth": {
+        "cause": "fto_generation_pending",
+        "resolution": "escalate_fto_generation"
+      },
+      "question_answers": {
+        "Q01": "Yes, bank account is linked.",
+        "Q02": "Yes, account details are correct.",
+        "Q03": "Yes, account is active.",
+        "Q30": "Yes, work has been officially measured by the technical officer.",
+        "Q31": "No, muster roll entries are correct and attendance is properly recorded.",
+        "Q32": "No, the Fund Transfer Order (FTO) has NOT been generated yet by the Programme Officer.",
+        "Q33": "No bank rejection — FTO itself is not generated.",
+        "Q34": "Wages for last 30 days work are pending, approximately 42 days overdue.",
+        "Q35": "No notification received.",
+        "Q45": "Yes, job card is active.",
+        "Q46": "Yes, Gram Panchayat approved the work."
+      },
+      "difficulty": "hard"
+    },
+    {
+      "case_id": "T3_002",
+      "grievance_text": "I am a MGNREGA worker from Barmer, Rajasthan. I worked for 25 days last month. I received wages for only 22 days. 3 days of my work are missing from the payment.",
+      "scheme": "MGNREGA",
+      "beneficiary": {
+        "name": "Bhagwan Das",
+        "state": "Rajasthan",
+        "district": "Barmer",
+        "age": 40,
+        "occupation": "MGNREGA labourer"
+      },
+      "ground_truth": {
+        "cause": "muster_roll_error",
+        "resolution": "correct_muster_roll"
+      },
+      "question_answers": {
+        "Q01": "Yes, bank is linked.",
+        "Q02": "Yes, correct details.",
+        "Q03": "Yes, account active.",
+        "Q30": "Yes, work was measured by the technical officer.",
+        "Q31": "Yes, 3 days of attendance are missing from the muster roll — the Gram Rozgar Sevak did not record them.",
+        "Q32": "Yes, FTO was generated but for only 22 days, not 25.",
+        "Q33": "No bank rejection.",
+        "Q34": "Partial wages received — 22 days paid, 3 days pending.",
+        "Q45": "Yes, job card active.",
+        "Q46": "Yes, Gram Panchayat approved."
+      },
+      "difficulty": "hard"
+    },
+    {
+      "case_id": "T3_003",
+      "grievance_text": "I am a MGNREGA worker from Tirunelveli, Tamil Nadu. I completed road construction work 3 weeks ago with 15 other workers. None of us have received wages yet. The Panchayat confirmed the work is done.",
+      "scheme": "MGNREGA",
+      "beneficiary": {
+        "name": "Meenakshi",
+        "state": "Tamil Nadu",
+        "district": "Tirunelveli",
+        "age": 38,
+        "occupation": "MGNREGA labourer"
+      },
+      "ground_truth": {
+        "cause": "work_not_measured",
+        "resolution": "request_work_measurement"
+      },
+      "question_answers": {
+        "Q01": "Yes, bank linked.",
+        "Q30": "No, the technical officer (Junior Engineer) has NOT yet measured or certified the completed work.",
+        "Q31": "No, muster roll is correct.",
+        "Q32": "No, FTO cannot be generated until work is measured.",
+        "Q33": "No bank rejection.",
+        "Q34": "Work completed 3 weeks ago, wages not received.",
+        "Q35": "No notification received.",
+        "Q45": "Yes, job card is active.",
+        "Q46": "Yes, Gram Panchayat certified the work as complete."
+      },
+      "difficulty": "hard"
+    },
+    {
+      "case_id": "T3_004",
+      "grievance_text": "I am a MGNREGA worker from Allahabad, Uttar Pradesh. I have been working on MGNREGA for 2 years and always received wages on time. For the last 2 months, wages are not credited. FTO is generated but I am not getting paid.",
+      "scheme": "MGNREGA",
+      "beneficiary": {
+        "name": "Kamlesh Kumar",
+        "state": "Uttar Pradesh",
+        "district": "Allahabad",
+        "age": 29,
+        "occupation": "MGNREGA labourer"
+      },
+      "ground_truth": {
+        "cause": "aadhaar_inactive",
+        "resolution": "reactivate_aadhaar"
+      },
+      "question_answers": {
+        "Q01": "Yes, bank account is linked.",
+        "Q02": "Yes, bank details are correct.",
+        "Q03": "Yes, account is active.",
+        "Q06": "Aadhaar appears seeded but the linked Aadhaar number has been deactivated by UIDAI.",
+        "Q08": "No, the Aadhaar has been DEACTIVATED by UIDAI — this is causing NPCI routing failure.",
+        "Q30": "Yes, work measured.",
+        "Q31": "No muster roll errors.",
+        "Q32": "Yes, FTO has been generated correctly.",
+        "Q33": "Yes, payment is being rejected because NPCI cannot route to bank due to inactive Aadhaar.",
+        "Q34": "Paid on time for 2 years, stopped 2 months ago.",
+        "Q35": "No notification received.",
+        "Q45": "Yes, job card active."
+      },
+      "difficulty": "hard"
+    },
+    {
+      "case_id": "T3_005",
+      "grievance_text": "I am a MGNREGA worker from Sitamarhi, Bihar. I worked last month and received wages before, but for the last 2 months wages are not coming. My bank account seems fine when I check at the branch.",
+      "scheme": "MGNREGA",
+      "beneficiary": {
+        "name": "Parvati Devi",
+        "state": "Bihar",
+        "district": "Sitamarhi",
+        "age": 45,
+        "occupation": "MGNREGA labourer"
+      },
+      "ground_truth": {
+        "cause": "rejection_by_bank",
+        "resolution": "resolve_bank_rejection"
+      },
+      "question_answers": {
+        "Q01": "Yes, bank account appears linked.",
+        "Q02": "No, the IFSC code in the MGNREGA records is outdated — the bank branch was merged and the IFSC changed 3 months ago.",
+        "Q03": "Yes, the new account at the merged branch is active.",
+        "Q30": "Yes, work was measured.",
+        "Q31": "No muster roll errors.",
+        "Q32": "Yes, FTO was generated.",
+        "Q33": "Yes, wages were REJECTED by the bank — IFSC code mismatch due to bank branch merger.",
+        "Q34": "Received wages for previous months, last 2 months unpaid.",
+        "Q45": "Yes, job card active.",
+        "Q48": "Bank passbook at the branch shows account is fine but no MGNREGA credits for 2 months."
+      },
+      "difficulty": "hard"
+    }
+  ]
+}

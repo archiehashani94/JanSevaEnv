@@ -1,0 +1,189 @@
+name: JanSevaEnv
+version: "1.0.0"
+description: >
+  An OpenEnv-compliant reinforcement learning environment that simulates
+  Indian welfare and pension grievance resolution. An AI agent identifies
+  the correct root cause from 35 predefined issues by asking step-by-step
+  diagnostic questions across PM-KISAN, MGNREGA, and pension schemes, then
+  suggests the correct resolution. Evaluation is fully rule-based.
+author: JanSevaEnv Team
+tags:
+  - openenv
+  - welfare
+  - india
+  - grievance-resolution
+  - multi-turn
+  - rule-based
+
+environment:
+  type: text
+  interaction: multi-turn
+  episode_termination: agent submits diagnosis or max_steps exceeded
+  deterministic: true
+  stochastic_reset: true   # random case selection when case_id not specified
+
+action_space:
+  type: discrete + structured
+  description: >
+    Two action types per step:
+    (1) ask_question — agent selects a question_id from the filtered question bank (Q01-Q50)
+    (2) submit_diagnosis — agent submits cause_id + resolution_id to end the episode
+  actions:
+    ask_question:
+      fields:
+        action_type: "ask_question"
+        question_id:
+          type: string
+          description: One of the available question IDs for the current scheme (e.g. Q06)
+    submit_diagnosis:
+      fields:
+        action_type: "submit_diagnosis"
+        cause_id:
+          type: string
+          description: Root cause ID from the 35-cause taxonomy (e.g. aadhaar_not_seeded)
+        resolution_id:
+          type: string
+          description: Resolution ID linked to the diagnosed cause (e.g. seed_aadhaar)
+        reasoning:
+          type: string
+          required: false
+          description: Optional free-text explanation (not graded)
+
+observation_space:
+  type: dict
+  fields:
+    case_id:
+      type: string
+      description: Unique identifier for the current grievance case
+    grievance_text:
+      type: string
+      description: Original complaint text from the beneficiary
+    scheme:
+      type: string
+      description: Welfare scheme this grievance relates to (e.g. PM-KISAN, MGNREGA, OAP)
+    step_number:
+      type: integer
+      description: Current step within the episode
+    max_steps:
+      type: integer
+      description: Maximum steps allowed (10 / 15 / 20 depending on task difficulty)
+    qa_history:
+      type: list[QAPair]
+      description: All questions asked so far and the answers received
+    available_questions:
+      type: dict[string, string]
+      description: "Filtered question bank for the current scheme — keys are question IDs, values are question text"
+    available_causes:
+      type: list[dict]
+      description: "All 35 possible root causes, each with id and label fields"
+    available_resolutions:
+      type: list[dict]
+      description: "All 35 possible resolutions, each with id and label fields"
+    done:
+      type: boolean
+      description: Whether the episode has ended
+
+reward:
+  type: shaped
+  range: [-0.5, 1.0]
+  description: >
+    Step reward: +0.05 for signal questions, +0.02 for diagnostic questions, -0.01 for irrelevant.
+    Episode score on submit_diagnosis: up to 1.0 based on correctness + efficiency + signal bonus.
+  step_rewards:
+    signal_question: +0.05
+    diagnostic_question: +0.02
+    irrelevant_question: -0.01
+    repeated_question: 0.0
+    invalid_question: -0.02
+  episode_score:
+    correct_cause_and_resolution_with_efficiency_and_signal: 1.0
+    correct_cause_and_resolution_no_signal: 0.70
+    correct_cause_only_with_signal: 0.55
+    correct_cause_only: 0.50
+    same_category_wrong_cause: 0.20
+    asked_signal_wrong_cause: 0.10
+    completely_wrong: 0.00
+
+tasks:
+  - id: task1
+    name: PM-KISAN Payment Not Received
+    description: >
+      A farmer is not receiving PM-KISAN installments. Root causes are primarily
+      from banking and KYC categories with clear confirmation signals.
+    difficulty: easy
+    scheme: PM-KISAN
+    max_steps: 10
+    num_cases: 5
+    causes:
+      - aadhaar_not_seeded
+      - bank_account_not_linked
+      - incorrect_bank_details
+      - land_records_mismatch
+      - npci_mapping_error
+
+  - id: task2
+    name: Old Age / Widow Pension Stopped
+    description: >
+      An elderly or widow beneficiary's monthly pension stopped. Causes span
+      pension, banking, KYC, and administrative categories with misleading signals.
+    difficulty: medium
+    scheme: OAP
+    max_steps: 15
+    num_cases: 5
+    causes:
+      - life_certificate_pending
+      - pensioner_marked_deceased
+      - aadhaar_mismatch
+      - bank_account_frozen
+      - district_level_pending
+
+  - id: task3
+    name: MGNREGA Wages Not Received
+    description: >
+      A MGNREGA labourer's wages are unpaid. The payment pipeline has 5 stages
+      (approval → measurement → muster roll → FTO → bank transfer) each of which
+      can fail. Some cases have intentionally misleading surface signals.
+    difficulty: hard
+    scheme: MGNREGA
+    max_steps: 20
+    num_cases: 5
+    causes:
+      - fto_generation_pending
+      - muster_roll_error
+      - work_not_measured
+      - aadhaar_inactive
+      - rejection_by_bank
+
+taxonomy:
+  num_causes: 35
+  num_resolutions: 35
+  num_questions: 50
+  cause_categories:
+    - banking
+    - kyc
+    - eligibility
+    - administrative
+    - pension
+    - pds
+    - mgnrega
+    - misc
+  source: app/data/taxonomy.json
+
+api:
+  framework: FastAPI
+  base_url: http://localhost:7860
+  endpoints:
+    reset: POST /reset
+    step: POST /step
+    state: GET /state
+    tasks: GET /tasks
+    health: GET /health
+
+baseline:
+  script: inference.py
+  model: meta-llama/Llama-3.1-8B-Instruct
+  expected_scores:
+    task1: 0.75
+    task2: 0.60
+    task3: 0.45
+    overall: 0.60
