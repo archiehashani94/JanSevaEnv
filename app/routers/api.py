@@ -59,9 +59,11 @@ def _detect_scheme(text: str) -> str:
 
 
 @router.post("/reset", response_model=Observation)
-def reset_episode(request: ResetRequest):
+def reset_episode(request: Optional[ResetRequest] = None):
     try:
-        return _env.reset(task_id=request.task_id, case_id=request.case_id)
+        task_id = (request.task_id if request and request.task_id else None) or "task1"
+        case_id = request.case_id if request else None
+        return _env.reset(task_id=task_id, case_id=case_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

@@ -72,7 +72,7 @@ class StepResult(BaseModel):
 
 
 class ResetRequest(BaseModel):
-    task_id: Literal["task1", "task2", "task3"]
+    task_id: Optional[Literal["task1", "task2", "task3"]] = "task1"
     case_id: Optional[str] = None
 
 
