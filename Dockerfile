@@ -13,5 +13,5 @@ COPY --chown=user ./requirements.txt requirements.txt
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 COPY --chown=user . /app
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
-# Fixed CMD path for uvicornecho "# trigger rebuild" >> Dockerfile
+CMD ["uvicorn", "app.app:app", "--host", "0.0.0.0", "--port", "7860"]
+# Fixed CMD path for uvicorn
