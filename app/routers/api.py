@@ -91,7 +91,9 @@ def detect_scheme_endpoint(text: str):
 
 
 @router.post("/step", response_model=StepResult, summary="Take one action")
-def step(action: AskQuestionAction | SubmitDiagnosisAction):
+from typing import Union
+
+def step(action: Union[AskQuestionAction, SubmitDiagnosisAction]):
     """
     Take one action in the current episode.
     - ask_question: provide question_id
