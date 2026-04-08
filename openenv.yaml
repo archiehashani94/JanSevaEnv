@@ -1,0 +1,242 @@
+name: JanSevaEnv
+version: "1.0.0"
+description: >
+  Reinforcement learning environment for Indian welfare and pension grievance
+  resolution. An agent investigates beneficiary complaints across PM-KISAN,
+  OAP, WAP, DAP, MGNREGA, and NFSA-PDS schemes by asking targeted questions
+  and submitting a root-cause diagnosis with a resolution.
+
+author: JanSevaEnv
+license: MIT
+
+# ── Runtime ──────────────────────────────────────────────────────────────────
+runtime:
+  type: http
+  base_url: "${API_BASE_URL}"   # e.g. https://user-janseva.hf.space
+  health_endpoint: /health
+
+# ── Episode lifecycle ─────────────────────────────────────────────────────────
+episode:
+  reset:
+    method: POST
+    path: /reset
+    request_schema:
+      type: object
+      required: [task_id]
+      properties:
+        task_id:
+          type: string
+          enum: [task1, task2, task3]
+          description: Task to load (easy / medium / hard)
+        case_id:
+          type: string
+          description: Specific case ID (optional; random if omitted)
+    response_schema: &observation
+      type: object
+      properties:
+        case_id:          { type: string }
+        grievance_text:   { type: string }
+        scheme:           { type: string }
+        step_number:      { type: integer }
+        max_steps:        { type: integer }
+        qa_history:
+          type: array
+          items:
+            type: object
+            properties:
+              question_id:    { type: string }
+              question_text:  { type: string }
+              answer:         { type: string }
+        available_questions:
+          type: object
+          additionalProperties: { type: string }
+          description: Map of question_id -> question_text
+        available_causes:
+          type: array
+          items:
+            type: object
+            properties:
+              id:            { type: string }
+              label:         { type: string }
+              resolution_id: { type: string }
+        available_resolutions:
+          type: array
+          items:
+            type: object
+            properties:
+              id:    { type: string }
+              label: { type: string }
+        done: { type: boolean }
+
+  step:
+    method: POST
+    path: /step
+    actions:
+      - name: ask_question
+        description: >
+          Ask one of the available diagnostic questions. The environment
+          returns the answer from the case record.
+        request_schema:
+          type: object
+          required: [action_type, question_id]
+          properties:
+            action_type:
+              type: string
+              const: ask_question
+            question_id:
+              type: string
+              description: Key from observation.available_questions (e.g. "Q06")
+        reward_signal: small positive (0.01–0.05 per informative question)
+
+      - name: submit_diagnosis
+        description: >
+          Submit root-cause diagnosis and resolution. Ends the episode.
+          Score depends on correctness and steps efficiency.
+        request_schema:
+          type: object
+          required: [action_type, cause_id, resolution_id]
+          properties:
+            action_type:
+              type: string
+              const: submit_diagnosis
+            cause_id:
+              type: string
+              description: ID from observation.available_causes
+            resolution_id:
+              type: string
+              description: ID from observation.available_resolutions
+            reasoning:
+              type: string
+              description: Optional free-text explanation
+
+    response_schema:
+      type: object
+      properties:
+        observation: *observation
+        reward:
+          type: object
+          properties:
+            step_reward:       { type: number }
+            cumulative_reward: { type: number }
+            episode_score:     { type: number, nullable: true }
+        done: { type: boolean }
+        info:
+          type: object
+          properties:
+            submitted_cause:     { type: string }
+            submitted_resolution: { type: string }
+            true_cause:          { type: string }
+            true_resolution:     { type: string }
+            cause_correct:       { type: boolean }
+            resolution_correct:  { type: boolean }
+            episode_score:       { type: number }
+            steps_used:          { type: integer }
+
+  state:
+    method: GET
+    path: /state
+    description: Inspect current episode state without advancing it
+
+# ── Tasks ─────────────────────────────────────────────────────────────────────
+tasks:
+  - id: task1
+    name: PM-KISAN Payment Not Received
+    scheme: PM-KISAN
+    difficulty: easy
+    max_steps: 10
+    num_cases: 12
+    description: >
+      A farmer has not received PM-KISAN installments. Root causes span
+      banking and KYC categories. 1–3 targeted questions are sufficient.
+
+  - id: task2
+    name: Old Age / Widow Pension Stopped
+    scheme: OAP
+    difficulty: medium
+    max_steps: 15
+    num_cases: 12
+    description: >
+      An elderly or widow beneficiary's monthly pension stopped without
+      notice. Causes span pension, banking, KYC, and administrative
+      categories. Some cases have misleading surface signals.
+
+  - id: task3
+    name: MGNREGA Wages & NFSA-PDS Grievances
+    scheme: MGNREGA
+    difficulty: hard
+    max_steps: 20
+    num_cases: 11
+    description: >
+      Hard multi-scheme cases covering MGNREGA wages (5-stage pipeline:
+      GP Approval → Measurement → Muster Roll → FTO → Bank Transfer)
+      and NFSA-PDS ration failures. Cases contain deliberate misleading
+      signals.
+
+# ── Taxonomy endpoints ────────────────────────────────────────────────────────
+taxonomy:
+  causes:
+    method: GET
+    path: /taxonomy/causes
+    description: All 35 root causes with categories, applicable schemes, and signal questions
+  resolutions:
+    method: GET
+    path: /taxonomy/resolutions
+    description: All 35 resolutions mapped to root causes
+  questions:
+    method: GET
+    path: /taxonomy/questions
+    description: Full question bank (50 questions, Q01–Q50)
+  schemes:
+    method: GET
+    path: /taxonomy/schemes
+    description: Supported welfare schemes
+
+# ── Scoring ───────────────────────────────────────────────────────────────────
+scoring:
+  perfect_score: 1.0
+  components:
+    cause_correct:
+      weight: 0.5
+      description: Correct root cause identified
+    resolution_correct:
+      weight: 0.3
+      description: Correct resolution mapped to cause
+    step_efficiency:
+      weight: 0.2
+      description: Reward for using fewer steps (penalised per wasted question)
+  step_reward:
+    informative_question: 0.05
+    redundant_question: -0.02
+    wrong_diagnosis: 0.0
+  episode_score_range: [0.0, 1.0]
+
+# ── Schemes ───────────────────────────────────────────────────────────────────
+schemes:
+  - id: PM-KISAN
+    name: Pradhan Mantri Kisan Samman Nidhi
+  - id: OAP
+    name: Old Age Pension
+  - id: WAP
+    name: Widow Assistance Pension
+  - id: DAP
+    name: Disability Assistance Pension
+  - id: MGNREGA
+    name: Mahatma Gandhi National Rural Employment Guarantee Act
+  - id: NFSA-PDS
+    name: National Food Security Act – Public Distribution System
+
+# ── Evaluation notes ──────────────────────────────────────────────────────────
+evaluation:
+  reproducibility: >
+    Set SEED environment variable to fix random case selection on /reset.
+    Same task_id + seed → same case_id every run.
+  stateless_note: >
+    The server holds one shared episode state. For parallel evaluation,
+    deploy separate instances or pass explicit case_id in /reset.
+  recommended_strategy: >
+    1. Call GET /taxonomy/causes to load the full cause → signal_question map.
+    2. Call POST /reset with task_id and explicit case_id for reproducibility.
+    3. For each available question, score it against known signal_questions
+       for all candidate causes. Ask the highest-scoring question first.
+    4. After 2–4 questions, pick the cause with the most confirmed signals.
+    5. Submit the paired resolution_id from the cause's resolution_id field.
