@@ -47,19 +47,33 @@ class DocumentFields:
 # ─── Text extraction ───────────────────────────────────────────────────────────
 
 def extract_text_from_bytes(file_bytes: bytes, filename: str) -> str:
-    """Extract raw text from PDF or image file bytes."""
+    """Extract raw text from PDF, image, or plain-text file bytes."""
     ext = filename.lower().rsplit(".", 1)[-1] if "." in filename else ""
 
     if ext == "pdf":
         return _extract_pdf_text(file_bytes)
     elif ext in ("png", "jpg", "jpeg", "webp", "bmp", "tiff", "tif"):
         return _extract_image_text(file_bytes)
+    elif ext in ("txt", "text"):
+        # plain text (for testing / copy-pasted content)
+        return file_bytes.decode("utf-8", errors="replace")
     else:
-        # Try PDF first, then image
+        # Try PDF first, then image, then plain text
         try:
-            return _extract_pdf_text(file_bytes)
+            text = _extract_pdf_text(file_bytes)
+            if text.strip():
+                return text
         except Exception:
+            pass
+        try:
             return _extract_image_text(file_bytes)
+        except Exception:
+            pass
+        # Last resort: try UTF-8 decode
+        try:
+            return file_bytes.decode("utf-8", errors="replace")
+        except Exception:
+            raise ValueError("Could not extract text from file. Upload a PDF, image (PNG/JPG), or text file.")
 
 
 def _extract_pdf_text(file_bytes: bytes) -> str:

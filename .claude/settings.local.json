@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"C:\\\\web development projects\\\\JanSevaEnv\\\\venv\\\\Lib\\\\site-packages\" /b)",
+      "Bash(findstr /i \"multipart pdfplumber pymupdf fitz pillow PIL tesseract\")",
+      "Bash(findstr /i \"multipart\")",
+      "Bash(where python:*)",
+      "Bash(venv\\\\Scripts\\\\pip install:*)",
+      "Bash(curl -s http://127.0.0.1:8000/openapi.json)",
+      "Bash(python3 -c \"import sys,json; routes=json.load\\(sys.stdin\\)['paths']; [print\\(r\\) for r in routes]\")",
+      "Bash(taskkill /PID 27532 /F)",
+      "Bash(taskkill /PID 15144 /F)",
+      "Bash(cmd /c \"taskkill /PID 27532 /F\")",
+      "Bash(cmd /c \"taskkill /PID 15144 /F\")",
+      "Bash(netstat -ano)",
+      "Bash(cmd:*)",
+      "Bash(powershell:*)",
+      "Bash(curl -s -X POST http://127.0.0.1:8000/process-document -F 'file=@/c/web development projects/JanSevaEnv/app/data/taxonomy.json;type=application/pdf' -F doc_type=Other)",
+      "Bash(curl:*)"
+    ]
+  }
+}

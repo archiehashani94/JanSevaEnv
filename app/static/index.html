@@ -384,6 +384,47 @@
   .q-item.asked { opacity:.4; cursor:default; pointer-events:none; }
   .q-item .q-id { font-size:10px; font-weight:700; color:var(--saffron); min-width:28px; flex-shrink:0; margin-top:1px; }
 
+  /* ─── DOCUMENT INTELLIGENCE ─── */
+  .doc-type-sel { margin-bottom: 8px; }
+  .doc-drop-zone {
+    border: 1.5px dashed var(--border); border-radius: 8px;
+    padding: 10px 12px; text-align: center; cursor: pointer; font-size: 12px;
+    color: var(--text-dim); transition: border-color .2s, background .2s;
+    user-select: none;
+  }
+  .doc-drop-zone:hover, .doc-drop-zone.drag-over {
+    border-color: var(--saffron); background: rgba(255,153,51,.06); color: var(--text);
+  }
+  .doc-drop-zone.uploading { opacity: .6; cursor: wait; pointer-events: none; }
+  .doc-fields-panel {
+    margin-top: 10px; background: var(--surface2); border-radius: 7px;
+    padding: 8px 10px; max-height: 150px; overflow-y: auto;
+  }
+  .doc-field-row {
+    display: flex; justify-content: space-between; gap: 8px;
+    padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,.04);
+    font-size: 11px; line-height: 1.5;
+  }
+  .doc-field-row:last-child { border-bottom: none; }
+  .doc-field-key { color: var(--text-muted); flex-shrink: 0; }
+  .doc-field-val { color: var(--text); text-align: right; word-break: break-all; }
+  .auto-answer-banner {
+    margin-bottom: 8px; padding: 7px 10px; border-radius: 7px;
+    background: rgba(76,175,125,.12); border: 1px solid rgba(76,175,125,.3);
+    color: var(--green); font-size: 11.5px; font-weight: 600;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .q-item.auto-answered {
+    background: rgba(76,175,125,.09);
+    border-color: rgba(76,175,125,.35);
+  }
+  .q-item.auto-answered .q-id { color: var(--green); }
+  .q-auto-badge {
+    margin-left: auto; flex-shrink: 0;
+    font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 10px;
+    background: rgba(76,175,125,.2); color: var(--green); cursor: default;
+  }
+
   /* submit section */
   .submit-section { padding: 16px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex:1; }
   .form-label { font-size:11px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; display:block; }
@@ -507,6 +548,111 @@
   .tax-desc { font-size:11.5px; color:var(--text-dim); line-height:1.5; }
   .tax-cat { display:inline-block; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:600; background:rgba(255,153,51,.1); color:var(--saffron); margin-top:8px; }
   .tax-section-title { font-size:13px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.6px; margin-bottom:12px; }
+
+  /* ══════════════════════════════════════════
+     DOCUMENTS VIEW
+  ══════════════════════════════════════════ */
+  #view-documents { flex-direction:column; overflow:hidden; }
+  .doc-body { flex:1; overflow-y:auto; padding:20px 24px; display:flex; flex-direction:column; gap:16px; }
+
+  /* top bar */
+  .doc-topbar {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding:14px 18px; background:var(--surface);
+    border:1px solid var(--border); border-radius:var(--radius);
+  }
+  .doc-topbar-label { font-size:12px; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; }
+  .doc-select {
+    background:var(--surface2); border:1.5px solid var(--border);
+    border-radius:8px; color:var(--text); font-family:inherit; font-size:13px;
+    padding:6px 10px; outline:none; cursor:pointer; transition:border-color .2s;
+  }
+  .doc-select:focus { border-color:var(--saffron); }
+  .doc-apply-btn {
+    margin-left:auto; padding:7px 18px;
+    background:linear-gradient(135deg,var(--saffron),var(--saffron-d));
+    color:#000; font-size:12px; font-weight:700; border-radius:8px;
+    cursor:pointer; border:none; font-family:inherit; transition:opacity .2s;
+  }
+  .doc-apply-btn:hover { opacity:.88; }
+  .doc-apply-btn:disabled { opacity:.35; cursor:not-allowed; }
+
+  /* slot grid */
+  .doc-slots-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px;
+  }
+
+  /* individual slot card */
+  .doc-slot {
+    background:var(--surface); border:1.5px solid var(--border);
+    border-radius:var(--radius); overflow:hidden;
+    transition:border-color .2s;
+  }
+  .doc-slot.has-file { border-color:rgba(255,153,51,.45); }
+  .doc-slot.uploading { border-color:rgba(255,153,51,.25); }
+  .doc-slot.error { border-color:rgba(224,82,82,.35); }
+
+  .doc-slot-header {
+    display:flex; align-items:center; gap:12px;
+    padding:14px 16px; border-bottom:1px solid var(--border);
+  }
+  .doc-slot-icon { font-size:28px; line-height:1; flex-shrink:0; }
+  .doc-slot-info { flex:1; min-width:0; }
+  .doc-slot-name { font-size:13px; font-weight:700; color:var(--text); }
+  .doc-slot-hint { font-size:10.5px; color:var(--text-muted); margin-top:2px; line-height:1.4; }
+  .doc-slot-status {
+    font-size:10px; font-weight:700; padding:3px 9px;
+    border-radius:20px; white-space:nowrap; flex-shrink:0;
+    background:rgba(255,255,255,.05); color:var(--text-muted);
+  }
+  .doc-slot-status.ok { background:rgba(76,175,125,.12); color:var(--green); }
+  .doc-slot-status.busy { background:rgba(255,153,51,.12); color:var(--saffron); }
+  .doc-slot-status.err { background:rgba(224,82,82,.12); color:var(--red); }
+
+  .doc-slot-footer {
+    display:flex; align-items:center; gap:10px; padding:10px 16px;
+  }
+  .doc-slot-upload-btn {
+    flex:1; padding:7px 0; border:1.5px dashed var(--border);
+    border-radius:8px; background:transparent; color:var(--text-dim);
+    font-size:12px; font-weight:600; font-family:inherit; cursor:pointer;
+    transition:border-color .2s, color .2s, background .2s;
+    text-align:center;
+  }
+  .doc-slot-upload-btn:hover {
+    border-color:var(--saffron); color:var(--saffron);
+    background:rgba(255,153,51,.05);
+  }
+  .doc-slot-upload-btn:disabled { opacity:.4; cursor:not-allowed; }
+  .doc-slot-clear-btn {
+    padding:7px 12px; border:1px solid var(--border); border-radius:8px;
+    background:transparent; color:var(--text-muted); font-size:12px;
+    font-family:inherit; cursor:pointer; transition:color .2s, border-color .2s;
+  }
+  .doc-slot-clear-btn:hover { color:var(--red); border-color:var(--red); }
+
+  /* expanded result panel */
+  .doc-slot-result {
+    border-top:1px solid var(--border); padding:14px 16px;
+    display:none; flex-direction:column; gap:12px;
+  }
+  .doc-slot-result.open { display:flex; }
+
+  .doc-result-badge { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; background:rgba(76,175,125,.12); color:var(--green); }
+  .doc-result-badge.err { background:rgba(224,82,82,.12); color:var(--red); }
+  .doc-fields-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:8px; }
+  .doc-field { background:var(--surface2); border-radius:8px; padding:9px 11px; }
+  .doc-field-key { font-size:10px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.4px; margin-bottom:4px; }
+  .doc-field-val { font-size:12.5px; font-weight:500; color:var(--text); word-break:break-all; }
+  .doc-qa-list { display:flex; flex-direction:column; gap:7px; }
+  .doc-qa-item { display:flex; align-items:center; gap:9px; padding:9px 12px; background:var(--surface2); border-radius:8px; }
+  .doc-qa-id { font-size:11px; font-weight:700; color:var(--saffron); min-width:34px; flex-shrink:0; }
+  .doc-qa-ans { font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:20px; flex-shrink:0; }
+  .doc-qa-ans.yes { background:rgba(76,175,125,.12); color:var(--green); }
+  .doc-qa-ans.no { background:rgba(224,82,82,.12); color:var(--red); }
+  .doc-qa-src { font-size:11px; color:var(--text-dim); flex:1; line-height:1.4; }
+  .doc-qa-conf { font-size:10.5px; color:var(--text-muted); flex-shrink:0; }
+  .doc-section-label { font-size:11px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; }
 
   /* ─── LOADING OVERLAY ─── */
   #loading { display:none; position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.5); backdrop-filter:blur(4px); align-items:center; justify-content:center; }
@@ -655,6 +801,9 @@
       <div class="nav-section-label">Reference</div>
       <div class="nav-item" data-view="taxonomy" onclick="navigate('taxonomy')">
         <span class="ni-icon">🗂️</span> Taxonomy
+      </div>
+      <div class="nav-item" data-view="documents" onclick="navigate('documents')">
+        <span class="ni-icon">📄</span> Documents
       </div>
 
       <div class="nav-section-label">API</div>
@@ -817,8 +966,33 @@
 
         <!-- action panel -->
         <div class="action-panel">
+
+          <!-- ── Document Intelligence ── -->
+          <div class="ap-section">
+            <div class="ap-title">📄 Document Intelligence</div>
+            <div style="font-size:11.5px;color:var(--text-muted);line-height:1.6;margin-bottom:10px">
+              Upload Aadhaar, bank passbook, job card, ration card and more — fields are auto-extracted and pre-fill investigation questions.
+            </div>
+            <!-- applied answers summary (shown after applyAllDocAnswers) -->
+            <div id="doc-applied-summary" style="display:none;margin-bottom:10px;padding:8px 10px;background:rgba(76,175,125,.08);border:1px solid rgba(76,175,125,.2);border-radius:8px;font-size:11.5px;color:var(--green)">
+              ✅ <span id="doc-applied-text">0 answers applied from documents</span>
+            </div>
+            <button onclick="navigate('documents')"
+              style="width:100%;padding:9px 0;border:1.5px dashed var(--saffron);border-radius:8px;
+                     background:rgba(255,153,51,.06);color:var(--saffron);font-size:12px;font-weight:700;
+                     font-family:inherit;cursor:pointer;transition:background .2s;"
+              onmouseover="this.style.background='rgba(255,153,51,.13)'"
+              onmouseout="this.style.background='rgba(255,153,51,.06)'">
+              📂 Open Document Upload
+            </button>
+          </div>
+
+          <!-- ── Available Questions ── -->
           <div class="ap-section">
             <div class="ap-title">📋 Available Questions</div>
+            <div class="auto-answer-banner" id="doc-auto-banner" style="display:none">
+              <span>✅</span><span id="doc-auto-text"></span>
+            </div>
             <div class="q-list" id="q-list">
               <div style="font-size:12px;color:var(--text-muted)">Start an episode to see questions.</div>
             </div>
@@ -886,6 +1060,36 @@
       </div>
       <div class="taxonomy-body" id="taxonomy-body">
         <div style="color:var(--text-muted);font-size:13px">Loading taxonomy…</div>
+      </div>
+    </div>
+
+    <!-- ─── DOCUMENTS VIEW ─── -->
+    <div class="view" id="view-documents">
+      <div class="doc-body">
+
+        <!-- Top bar: scheme selector + apply button -->
+        <div class="doc-topbar">
+          <span class="doc-topbar-label">Scheme</span>
+          <select class="doc-select" id="doc-global-scheme">
+            <option value="">Auto-detect from document</option>
+            <option value="PM-KISAN">PM-KISAN</option>
+            <option value="OAP">OAP – Old Age Pension</option>
+            <option value="WAP">WAP – Widow Pension</option>
+            <option value="DAP">DAP – Disability Pension</option>
+            <option value="MGNREGA">MGNREGA</option>
+            <option value="NFSA-PDS">NFSA-PDS</option>
+          </select>
+          <span style="font-size:12px;color:var(--text-muted);flex:1">
+            Upload each document below separately — fields are extracted and will auto-answer investigation questions.
+          </span>
+          <button class="doc-apply-btn" id="doc-apply-btn" onclick="applyAllDocAnswers()" disabled>
+            ✅ Apply to Investigation
+          </button>
+        </div>
+
+        <!-- Per-document-type slots grid -->
+        <div class="doc-slots-grid" id="doc-slots-grid"></div>
+
       </div>
     </div>
 
@@ -1042,6 +1246,7 @@ let cumulativeReward = 0;
 let causeResolutionMap = {};   // cause_id -> {resolution_id, resolution_label}
 let tasksData = [];            // raw tasks from /tasks
 let taxonomyAll = {causes:[], resolutions:[]}; // full taxonomy for search
+let docAutoAnswers = {};       // qid -> {answer, confidence, source, field}
 
 /* ══════════════════════════════════════════
    BOOT
@@ -1059,13 +1264,14 @@ function bootApp(){
 }
 
 window.addEventListener('DOMContentLoaded',function(){
+  initDocSlots();
   if(sessionStorage.getItem('jsenv_user')) bootApp();
 });
 
 /* ══════════════════════════════════════════
    NAVIGATION
 ══════════════════════════════════════════ */
-const VIEW_TITLES={dashboard:'Dashboard',investigate:'Investigate',history:'Episode History',taxonomy:'Taxonomy Browser'};
+const VIEW_TITLES={dashboard:'Dashboard',investigate:'Investigate',history:'Episode History',taxonomy:'Taxonomy Browser',documents:'Document Intelligence'};
 
 function navigate(view){
   document.querySelectorAll('.nav-item[data-view]').forEach(n=>n.classList.toggle('active',n.dataset.view===view));
@@ -1093,7 +1299,7 @@ async function api(method,path,body){
   if(body) opts.body=JSON.stringify(body);
   let r;
   try { r=await fetch(path,opts); }
-  catch(e){ throw new Error('Cannot reach server. Start it with: uvicorn app.main:app --reload --port 8080'); }
+  catch(e){ throw new Error('Cannot reach server. Start it with: uvicorn app.main:app --port 8084'); }
   const data=await r.json();
   if(!r.ok) throw new Error(data.detail||'API error');
   return data;
@@ -1465,17 +1671,23 @@ function populateCustomQuestions(qmap){
     const wrap = document.createElement('div');
     wrap.className = 'q-item q-item-custom';
     wrap.dataset.qid = qid;
+    wrap.dataset.qtext = qtext;  // store text directly — no DOM parsing needed
+    const isAuto = docAutoAnswers && docAutoAnswers[qid];
+    if(isAuto) wrap.classList.add('auto-answered');
     wrap.innerHTML =
       '<div style="display:flex;gap:6px;align-items:flex-start">' +
         '<span class="q-id">'+qid+'</span>' +
         '<span style="font-size:12px;line-height:1.4">'+escHtml(qtext)+'</span>' +
+        (isAuto ? '<span class="q-auto-badge" title="'+escHtml(docAutoAnswers[qid].source||'')+'">'+Math.round((docAutoAnswers[qid].confidence||0)*100)+'%</span>' : '') +
       '</div>' +
       '<div class="q-answer-row">' +
-        '<input class="q-answer-input" id="ans-'+qid+'" placeholder="Your answer (Yes / No / describe…)">' +
+        '<input class="q-answer-input" id="ans-'+qid+'" placeholder="Your answer (Yes / No / describe…)"' +
+          (isAuto ? ' value="'+escHtml(docAutoAnswers[qid].answer||'')+'"' : '') + '>' +
         '<button class="q-answer-btn" onclick="submitCustomAnswer(\''+qid+'\')">Ask</button>' +
       '</div>';
     list.appendChild(wrap);
   });
+  if(docAutoAnswers && Object.keys(docAutoAnswers).length > 0) applyAutoAnswers();
 }
 
 async function submitCustomAnswer(qid){
@@ -1483,7 +1695,7 @@ async function submitCustomAnswer(qid){
   const answer = inp ? inp.value.trim() : '';
   if(!answer){ showToast('Type your answer first','error'); return; }
   const qEl = document.querySelector('.q-item[data-qid="'+qid+'"]');
-  const qtext = qEl ? qEl.querySelector('span:not(.q-id)').textContent : qid;
+  const qtext = qEl ? (qEl.dataset.qtext || qid) : qid;
   await askQuestion(qid, qtext, answer);
 }
 
@@ -1557,8 +1769,14 @@ async function askQuestion(qid, qtext, customAnswer){
     // re-score causes after each question
     filterCauseDropdown(document.getElementById('cause-search').value);
 
+    // Use the text the backend recorded in qa_history as the authoritative source
+    const lastQA = obs.qa_history && obs.qa_history.length > 0
+      ? obs.qa_history[obs.qa_history.length - 1] : null;
+    const displayQText = (lastQA && lastQA.question_id === qid)
+      ? lastQA.question_text : qtext;
+
     addMsg('question','🔎','Question',
-      '<span style="color:var(--saffron);font-weight:600">['+qid+']</span> '+escHtml(qtext),
+      '<span style="color:var(--saffron);font-weight:600">['+qid+']</span> '+escHtml(displayQText),
       result.reward.step_reward, 'Step '+obs.step_number+'/'+obs.max_steps);
 
     const chat = document.getElementById('chat-messages');
@@ -1729,6 +1947,29 @@ function setFlowStep(n){
 }
 
 /* ══════════════════════════════════════════
+   DOCUMENT INTELLIGENCE
+══════════════════════════════════════════ */
+const DOC_TYPE_HINTS = {
+  'Aadhaar':             'Extracts: Aadhaar no., Name, DOB, Gender, Mobile → auto-answers Q06, Q07, Q08',
+  'Bank Passbook':       'Extracts: Account no., IFSC, Bank name, Last transaction → auto-answers Q01, Q02, Q03, Q48',
+  'PM-KISAN Certificate':'Extracts: Registration no., DBT status, eKYC status → auto-answers Q01, Q14, Q36, Q44, Q47',
+  'Job Card':            'Extracts: Job card no., Scheme code → auto-answers Q14, Q21, Q22, Q36',
+  'Ration Card':         'Extracts: Ration card no., FPS code → auto-answers Q14, Q31, Q36',
+  'Income Certificate':  'Extracts: Annual income → auto-answers Q11 (eligibility check)',
+  'Land Record':         'Extracts: Survey/Khasra no., Land area, Owner name → auto-answers Q12',
+  'Pension Certificate': 'Extracts: Registration no., DBT status, eKYC → auto-answers Q01, Q14, Q36, Q47',
+  'Other':               'Extracts all detectable fields: Aadhaar, bank, registration, income, land',
+};
+
+function onDocTypeChange(val){
+  const hint = document.getElementById('doc-type-hint');
+  if(hint) hint.textContent = DOC_TYPE_HINTS[val] || DOC_TYPE_HINTS['Other'];
+}
+
+// legacy stubs — replaced by initDocSlots / processSlotFile above
+function setupDocUpload(){} // kept for safety, initDocSlots() is called instead
+
+/* ══════════════════════════════════════════
    POPULATE CONTROLS
 ══════════════════════════════════════════ */
 function populateQuestions(qmap){
@@ -1741,10 +1982,22 @@ function populateQuestions(qmap){
   Object.entries(qmap).sort((a,b)=>a[0].localeCompare(b[0])).forEach(function([qid,qtext]){
     const div=document.createElement('div');
     div.className='q-item'; div.dataset.qid=qid;
+    div.dataset.qtext=qtext;  // store text directly — no DOM parsing needed
+    const isAuto = docAutoAnswers && docAutoAnswers[qid];
+    if(isAuto) div.classList.add('auto-answered');
     div.innerHTML='<span class="q-id">'+qid+'</span><span>'+escHtml(qtext)+'</span>';
+    if(isAuto){
+      const badge=document.createElement('span');
+      badge.className='q-auto-badge';
+      badge.title=docAutoAnswers[qid].source||'';
+      badge.textContent=Math.round((docAutoAnswers[qid].confidence||0)*100)+'%';
+      div.appendChild(badge);
+    }
     div.addEventListener('click',function(){ askQuestion(qid,qtext); });
     list.appendChild(div);
   });
+  // show banner if we have auto answers for this question set
+  if(docAutoAnswers && Object.keys(docAutoAnswers).length > 0) applyAutoAnswers();
 }
 
 function populateCauses(causes, resolutions){
@@ -1871,6 +2124,280 @@ function filterTaxonomy(query){
   );
   renderTaxonomy(fc, fr);
 }
+
+/* ══════════════════════════════════════════
+   DOCUMENT INTELLIGENCE — PER-SLOT UPLOADS
+══════════════════════════════════════════ */
+const DOC_SLOT_TYPES = [
+  { key:'aadhaar',    label:'Aadhaar Card',              icon:'🪪', hint:'Extracts: Name, DOB, Aadhaar No., Mobile, Gender' },
+  { key:'passbook',   label:'Bank Passbook',             icon:'🏦', hint:'Extracts: Account No., IFSC, Bank Name, Last Transaction' },
+  { key:'pmkisan',    label:'PM-KISAN Certificate',      icon:'🌾', hint:'Extracts: Registration No., DBT Status, eKYC Status' },
+  { key:'jobcard',    label:'Job Card (MGNREGA)',         icon:'💼', hint:'Extracts: Job Card No., Name, Registration' },
+  { key:'ration',     label:'Ration Card (NFSA-PDS)',    icon:'🍚', hint:'Extracts: Ration Card No., FPS Code, Family Details' },
+  { key:'income',     label:'Income Certificate',        icon:'📜', hint:'Extracts: Annual Income, Eligibility Status' },
+  { key:'land',       label:'Land Record / Khasra',      icon:'🗺️', hint:'Extracts: Survey No., Land Area, Owner Name' },
+  { key:'pension',    label:'Pension Certificate (OAP/WAP/DAP)', icon:'👴', hint:'Extracts: Pension No., KYC Status, Registration' },
+];
+
+// stores { data, autoAnswers } per slot key once uploaded
+const docSlotData = {};
+
+function initDocSlots(){
+  const grid = document.getElementById('doc-slots-grid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  DOC_SLOT_TYPES.forEach(st => {
+    const card = document.createElement('div');
+    card.className = 'doc-slot';
+    card.id = 'slot-' + st.key;
+    card.innerHTML = `
+      <input type="file" id="file-${st.key}" accept=".pdf,.png,.jpg,.jpeg,.webp,.bmp,.tiff" style="display:none"
+        onchange="handleSlotFile(this,'${escHtml(st.label)}','${st.key}')">
+      <div class="doc-slot-header">
+        <div class="doc-slot-icon">${st.icon}</div>
+        <div class="doc-slot-info">
+          <div class="doc-slot-name">${escHtml(st.label)}</div>
+          <div class="doc-slot-hint">${escHtml(st.hint)}</div>
+        </div>
+        <div class="doc-slot-status" id="status-${st.key}">Not uploaded</div>
+      </div>
+      <div class="doc-slot-footer">
+        <button class="doc-slot-upload-btn" id="upbtn-${st.key}"
+          onclick="document.getElementById('file-${st.key}').click()">
+          📎 Upload
+        </button>
+      </div>
+      <div class="doc-slot-result" id="result-${st.key}"></div>`;
+    // drag-and-drop on each card
+    card.addEventListener('dragover', e => { e.preventDefault(); card.style.borderColor='var(--saffron)'; });
+    card.addEventListener('dragleave', () => { card.style.borderColor=''; });
+    card.addEventListener('drop', e => {
+      e.preventDefault(); card.style.borderColor='';
+      const f = e.dataTransfer.files[0];
+      if(f) processSlotFile(f, st.label, st.key);
+    });
+    grid.appendChild(card);
+  });
+}
+
+async function handleSlotFile(input, label, key){
+  const f = input.files[0];
+  input.value = '';
+  if(f) await processSlotFile(f, label, key);
+}
+
+async function processSlotFile(file, label, key){
+  const card    = document.getElementById('slot-' + key);
+  const statusEl= document.getElementById('status-' + key);
+  const upBtn   = document.getElementById('upbtn-' + key);
+  const resultEl= document.getElementById('result-' + key);
+
+  const allowed = ['application/pdf','image/png','image/jpeg','image/webp','image/bmp','image/tiff'];
+  if(!allowed.includes(file.type) && !file.name.match(/\.(pdf|png|jpe?g|webp|bmp|tiff?)$/i)){
+    showToast(`${file.name}: unsupported file type`, 'error'); return;
+  }
+
+  // Mark busy
+  card.className = 'doc-slot uploading';
+  statusEl.className = 'doc-slot-status busy';
+  statusEl.textContent = 'Extracting…';
+  upBtn.disabled = true;
+  resultEl.className = 'doc-slot-result';
+  resultEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text-dim)">
+    <div class="loading-spinner" style="width:16px;height:16px;border-width:2px;margin:0;flex-shrink:0"></div>
+    Processing <strong>${escHtml(file.name)}</strong>…</div>`;
+  resultEl.classList.add('open');
+
+  const scheme = document.getElementById('doc-global-scheme').value;
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('doc_type', label);
+  if(scheme) fd.append('scheme', scheme);
+
+  let data;
+  try {
+    const r = await fetch('/process-document', {method:'POST', body:fd});
+    data = await r.json();
+    // If HTTP error (4xx/5xx), FastAPI returns {detail:"..."} — normalise it
+    if(!r.ok){
+      data = { success: false, error: data.detail || `Server error ${r.status}` };
+    }
+  } catch(err) {
+    card.className = 'doc-slot error';
+    statusEl.className = 'doc-slot-status err';
+    statusEl.textContent = 'Error';
+    upBtn.disabled = false;
+    resultEl.innerHTML = `<div style="color:var(--red);font-size:12px">❌ Network error — ${escHtml(err.message)}</div>`;
+    return;
+  }
+
+  upBtn.disabled = false;
+
+  if(!data.success){
+    card.className = 'doc-slot error';
+    statusEl.className = 'doc-slot-status err';
+    statusEl.textContent = 'Failed';
+    resultEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:12px;color:var(--red);font-weight:600">❌ Extraction failed</span>
+      </div>
+      <div style="font-size:12px;color:var(--red)">${escHtml(data.error||'Unknown error')}</div>
+      <div style="margin-top:8px">
+        <button class="doc-slot-upload-btn" style="width:auto;padding:5px 14px"
+          onclick="document.getElementById('file-${key}').click()">Try Again</button>
+      </div>`;
+    return;
+  }
+
+  // Success — store data
+  docSlotData[key] = data;
+  const n = data.questions_answered || 0;
+
+  card.className = 'doc-slot has-file';
+  statusEl.className = 'doc-slot-status ok';
+  statusEl.textContent = `✓ ${n} Q answered`;
+  upBtn.textContent = '🔄 Replace';
+
+  // Build fields HTML
+  const fieldLabels = {
+    name:'Name', dob:'Date of Birth', gender:'Gender', aadhaar_number:'Aadhaar',
+    mobile_number:'Mobile', bank_account:'Bank Account', ifsc_code:'IFSC',
+    bank_name:'Bank Name', last_transaction_date:'Last Transaction',
+    last_transaction_amount:'Amount', registration_number:'Registration No.',
+    job_card_number:'Job Card No.', ration_card_number:'Ration Card No.',
+    fps_code:'FPS Code', annual_income:'Annual Income', land_survey_number:'Survey No.',
+    land_area:'Land Area', dbt_status:'DBT Status', kyc_status:'KYC Status',
+    detected_scheme:'Detected Scheme'
+  };
+  const fields = data.fields || {};
+  let fieldsHtml = Object.entries(fields).map(([k,v])=>`
+    <div class="doc-field">
+      <div class="doc-field-key">${fieldLabels[k]||k.replace(/_/g,' ')}</div>
+      <div class="doc-field-val">${escHtml(String(v))}</div>
+    </div>`).join('');
+  if(!fieldsHtml) fieldsHtml = '<div style="font-size:12px;color:var(--text-muted);grid-column:1/-1">No fields could be extracted.</div>';
+
+  const qa = data.auto_answers || {};
+  let qaHtml = Object.entries(qa).map(([qid,info])=>`
+    <div class="doc-qa-item">
+      <span class="doc-qa-id">${escHtml(qid)}</span>
+      <span class="doc-qa-ans ${info.answer==='Yes'?'yes':'no'}">${escHtml(info.answer)}</span>
+      <span class="doc-qa-src">${escHtml(info.source||'')}</span>
+      <span class="doc-qa-conf">${Math.round((info.confidence||0)*100)}%</span>
+    </div>`).join('');
+  if(!qaHtml) qaHtml = '<div style="font-size:12px;color:var(--text-muted)">No questions could be auto-answered.</div>';
+
+  const schemeTag = data.detected_scheme
+    ? `<span class="pill pill-task" style="font-size:10px;margin-left:6px">${escHtml(data.detected_scheme)}</span>` : '';
+
+  resultEl.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <span style="font-size:12px;color:var(--text-dim)">📄 <strong>${escHtml(file.name)}</strong></span>
+      ${schemeTag}
+      <span class="doc-result-badge" style="margin-left:auto">${n} Q auto-answered</span>
+    </div>
+    <div class="doc-section-label" style="margin-bottom:8px">Extracted Fields</div>
+    <div class="doc-fields-grid" style="margin-bottom:12px">${fieldsHtml}</div>
+    <div class="doc-section-label" style="margin-bottom:8px">Auto-Answered Questions</div>
+    <div class="doc-qa-list">${qaHtml}</div>
+    <div style="margin-top:10px">
+      <button class="doc-slot-upload-btn" style="width:auto;padding:5px 14px;border-style:solid;border-color:var(--red);color:var(--red)"
+        onclick="clearDocSlot('${key}')">🗑 Remove</button>
+    </div>`;
+
+  updateDocApplyBtn();
+  showToast(`${label}: extracted ${n} auto-answer${n===1?'':'s'}`, 'success');
+}
+
+function clearDocSlot(key){
+  delete docSlotData[key];
+  const card    = document.getElementById('slot-' + key);
+  const statusEl= document.getElementById('status-' + key);
+  const upBtn   = document.getElementById('upbtn-' + key);
+  const resultEl= document.getElementById('result-' + key);
+  card.className = 'doc-slot';
+  statusEl.className = 'doc-slot-status';
+  statusEl.textContent = 'Not uploaded';
+  upBtn.textContent = '📎 Upload';
+  upBtn.disabled = false;
+  resultEl.className = 'doc-slot-result';
+  resultEl.innerHTML = '';
+  updateDocApplyBtn();
+}
+
+function updateDocApplyBtn(){
+  const btn = document.getElementById('doc-apply-btn');
+  if(!btn) return;
+  const n = Object.keys(docSlotData).length;
+  btn.disabled = n === 0;
+  const totalQ = Object.values(docSlotData).reduce((s,d)=>s+(d.questions_answered||0),0);
+  btn.textContent = n > 0 ? `✅ Apply ${totalQ} Answer${totalQ===1?'':'s'} to Investigation` : '✅ Apply to Investigation';
+}
+
+function applyAllDocAnswers(){
+  // Merge all auto_answers from all uploaded slots
+  const merged = {};
+  Object.values(docSlotData).forEach(d => {
+    const qa = d.auto_answers || {};
+    Object.entries(qa).forEach(([qid, info]) => {
+      // higher confidence wins
+      if(!merged[qid] || info.confidence > merged[qid].confidence)
+        merged[qid] = info;
+    });
+  });
+  const qids = Object.keys(merged);
+  if(!qids.length){ showToast('No answers to apply — upload documents first', 'error'); return; }
+
+  // Apply to current q-list
+  let applied = 0;
+  qids.forEach(qid => {
+    const info = merged[qid];
+    // Fill inline input if it exists (custom mode)
+    const inp = document.getElementById('ans-' + qid);
+    if(inp && !inp.disabled){
+      inp.value = info.answer;
+      inp.style.borderColor = 'var(--saffron)';
+    }
+    // Mark in q-list with green doc badge
+    const el = document.querySelector('.q-item[data-qid="'+qid+'"]');
+    if(el && !el.classList.contains('asked')){
+      let badge = el.querySelector('.doc-autofill-badge');
+      if(!badge){
+        badge = document.createElement('span');
+        badge.className = 'doc-autofill-badge';
+        badge.style.cssText = 'font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:10px;background:rgba(255,153,51,.18);color:var(--saffron);margin-left:6px;flex-shrink:0';
+        const qtext = el.querySelector('.q-text');
+        if(qtext) qtext.appendChild(badge);
+        else el.appendChild(badge);
+      }
+      badge.textContent = `📄 ${info.answer} (${Math.round(info.confidence*100)}%)`;
+      el.style.borderColor = 'rgba(255,153,51,.4)';
+      applied++;
+    }
+  });
+
+  // Show banner
+  const banner  = document.getElementById('doc-auto-banner');
+  const bannerT = document.getElementById('doc-auto-text');
+  if(banner && bannerT){
+    bannerT.textContent = `${applied} question${applied===1?'':'s'} pre-filled from documents`;
+    banner.style.display = 'flex';
+  }
+
+  // update sidebar summary
+  const sumDiv = document.getElementById('doc-applied-summary');
+  const sumTxt = document.getElementById('doc-applied-text');
+  if(sumDiv && sumTxt){
+    const totalDocs = Object.keys(docSlotData).length;
+    sumTxt.textContent = `${applied} answer${applied===1?'':'s'} applied from ${totalDocs} document${totalDocs===1?'':'s'}`;
+    sumDiv.style.display = 'block';
+  }
+
+  navigate('investigate');
+  showToast(`Applied ${applied} document answer${applied===1?'':'s'} to investigation`, 'success');
+}
+
+
 </script>
 </body>
 </html>
