@@ -1,4 +1,4 @@
 name: JanSevaEnv
 
-entry_point: server.app:app
+entry_point: server.app:main
 inference_script: inference.py
