@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "janseva-env"
 version = "1.0.0"
 description = "Indian welfare and pension grievance resolution RL environment"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.100.0",
     "uvicorn[standard]>=0.23.0",
@@ -17,6 +17,7 @@ dependencies = [
     "pytesseract>=0.3.10",
     "Pillow>=10.0.0",
     "openai>=1.0.0",
+    "openenv-core>=0.2.0"
 ]
 
 [tool.setuptools.packages.find]
@@ -31,3 +32,6 @@ inference_script = "inference.py"
 spec = "openenv.yaml"
 docker = "Dockerfile"
 modes = ["docker", "python"]
+
+[project.scripts]
+server = "server.app:app"

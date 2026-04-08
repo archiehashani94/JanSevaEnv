@@ -1,9 +1,3 @@
-"""
-main.py
-FastAPI application entry point for JanSevaEnv.
-Mounts the API router and serves the static frontend from app/static/.
-"""
-
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -16,11 +10,12 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Mount API routes
+# API routes
 app.include_router(router)
 
-# Serve the frontend from app/static/
+# Static frontend
 _STATIC_DIR = Path(__file__).parent / "static"
+
 if _STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 
@@ -28,7 +23,7 @@ if _STATIC_DIR.exists():
     def serve_frontend():
         return FileResponse(str(_STATIC_DIR / "index.html"))
 
-
-@app.get("/health", summary="Health check")
+# Health check (IMPORTANT for hackathon)
+@app.get("/health")
 def health():
-    return {"status": "ok", "service": "JanSevaEnv"}
+    return {"status": "ok"}
