@@ -5,8 +5,17 @@ All routes delegate directly to the JanSevaEnv environment instance.
 """
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
-from typing import Optional
-from app.models import ResetRequest, CustomResetRequest, AskQuestionAction, SubmitDiagnosisAction, StepResult, Observation, State
+from typing import Optional, Union  # ✅ FIXED (moved here)
+
+from app.models import (
+    ResetRequest,
+    CustomResetRequest,
+    AskQuestionAction,
+    SubmitDiagnosisAction,
+    StepResult,
+    Observation,
+    State,
+)
 from app.environment import JanSevaEnv
 from app.schemes.root_causes import get_all_causes
 from app.schemes.resolutions import get_all_resolutions
@@ -18,7 +27,7 @@ from app.document_extractor import process_document
 
 router = APIRouter()
 
-# Single shared environment instance (session-based; one episode at a time)
+# Single shared environment instance
 _env = JanSevaEnv()
 
 TASK_META_MAP = {
@@ -33,82 +42,59 @@ TASK_META_MAP = {
 # ---------------------------------------------------------------------------
 
 def _detect_scheme(text: str) -> str:
-    """Keyword-based scheme detection from free-form grievance text."""
     t = text.lower()
-    if any(k in t for k in ["mgnrega", "mnrega", "nrega", "job card", "muster roll", "fto", "labourer", "wages unpaid", "wage payment"]):
+    if any(k in t for k in ["mgnrega", "mnrega", "nrega"]):
         return "MGNREGA"
-    if any(k in t for k in ["widow pension", "widow assistance", "wap", "ignwps"]):
+    if any(k in t for k in ["widow", "wap"]):
         return "WAP"
-    if any(k in t for k in ["old age pension", "old age", "oap", "jeevan pramaan", "life certificate", "annual certificate", "pensioner"]):
+    if any(k in t for k in ["old age", "oap"]):
         return "OAP"
-    if any(k in t for k in ["ration", "pds", "fair price shop", "fps", "food grain", "nfsa", "ration card", "foodgrain", "wheat", "rice quota"]):
+    if any(k in t for k in ["ration", "pds"]):
         return "NFSA-PDS"
-    if any(k in t for k in ["disability pension", "disabled", "dap", "handicap", "divyang"]):
+    if any(k in t for k in ["disability", "dap"]):
         return "DAP"
-    if any(k in t for k in ["pm-kisan", "pmkisan", "kisan samman", "farmer installment", "kisan nidhi"]):
+    if any(k in t for k in ["pm-kisan", "kisan"]):
         return "PM-KISAN"
-    if any(k in t for k in ["farmer", "kisan", "agriculture", "installment", "pm kisan", "farm"]):
-        return "PM-KISAN"
-    if any(k in t for k in ["pension", "pensioner", "monthly pension"]):
-        return "OAP"
-    return "PM-KISAN"  # safe default
+    return "PM-KISAN"
 
 
-@router.post("/reset", response_model=Observation, summary="Start a new episode")
+@router.post("/reset", response_model=Observation)
 def reset_episode(request: ResetRequest):
-    """
-    Start a new episode for the given task.
-    Optionally specify a case_id to load a specific case; otherwise a random one is selected.
-    """
     try:
-        obs = _env.reset(task_id=request.task_id, case_id=request.case_id)
-        return obs
+        return _env.reset(task_id=request.task_id, case_id=request.case_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/reset-custom", response_model=Observation, summary="Start a custom episode with user-written problem")
+@router.post("/reset-custom", response_model=Observation)
 def reset_custom(request: CustomResetRequest):
-    """
-    Start a custom episode. The user provides their own grievance text.
-    Scheme is auto-detected from the text if not supplied.
-    Questions are drawn from the full scheme question bank — the user answers each one.
-    No scoring at the end (no ground truth).
-    """
     scheme = request.scheme or _detect_scheme(request.grievance_text)
-    from app.schemes.policies import SCHEMES
     if scheme not in SCHEMES:
         scheme = "PM-KISAN"
     try:
-        obs = _env.reset_custom(grievance_text=request.grievance_text, scheme=scheme)
-        return obs
+        return _env.reset_custom(
+            grievance_text=request.grievance_text, scheme=scheme
+        )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/detect-scheme", summary="Auto-detect scheme from grievance text")
+@router.get("/detect-scheme")
 def detect_scheme_endpoint(text: str):
-    """Return the auto-detected scheme for a grievance description."""
-    return {"scheme": _detect_scheme(text), "text_preview": text[:120]}
+    return {"scheme": _detect_scheme(text)}
 
 
-@router.post("/step", response_model=StepResult, summary="Take one action")
-def step(action: AskQuestionAction | SubmitDiagnosisAction):
-    """
-    Take one action in the current episode.
-    - ask_question: provide question_id
-    - submit_diagnosis: provide cause_id + resolution_id (ends episode)
-    """
+# ✅ FIXED STEP FUNCTION
+@router.post("/step", response_model=StepResult)
+def step(action: Union[AskQuestionAction, SubmitDiagnosisAction]):
     try:
-        result = _env.step(action)
-        return result
+        return _env.step(action)
     except RuntimeError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/state", response_model=State, summary="Get current episode state")
+@router.get("/state", response_model=State)
 def get_state():
-    """Return the full internal state of the current episode."""
     try:
         return _env.state()
     except RuntimeError as e:
@@ -116,80 +102,62 @@ def get_state():
 
 
 # ---------------------------------------------------------------------------
-# Task metadata
+# Tasks
 # ---------------------------------------------------------------------------
 
-@router.get("/tasks", summary="List all tasks")
+@router.get("/tasks")
 def list_tasks():
-    """Return metadata for all three tasks."""
     return {"tasks": list(TASK_META_MAP.values())}
 
 
-@router.get("/tasks/{task_id}", summary="Get a single task's metadata")
+@router.get("/tasks/{task_id}")
 def get_task(task_id: str):
-    """Return metadata for a specific task (task1, task2, or task3)."""
     if task_id not in TASK_META_MAP:
-        raise HTTPException(status_code=404, detail=f"Task '{task_id}' not found.")
+        raise HTTPException(status_code=404, detail="Task not found")
     return TASK_META_MAP[task_id]
 
 
 # ---------------------------------------------------------------------------
-# Taxonomy endpoints
+# Taxonomy
 # ---------------------------------------------------------------------------
 
-@router.get("/taxonomy/causes", summary="List all 35 root causes")
+@router.get("/taxonomy/causes")
 def list_causes():
-    """Return all root cause definitions from taxonomy.json."""
     return {"causes": get_all_causes()}
 
 
-@router.get("/taxonomy/resolutions", summary="List all 35 resolutions")
+@router.get("/taxonomy/resolutions")
 def list_resolutions():
-    """Return all resolution definitions from taxonomy.json."""
     return {"resolutions": get_all_resolutions()}
 
 
-@router.get("/taxonomy/questions", summary="List the full question bank")
+@router.get("/taxonomy/questions")
 def list_questions():
-    """Return the full diagnostic question bank (Q01-Q50)."""
     return {"questions": get_question_bank()}
 
 
-@router.get("/taxonomy/schemes", summary="List all scheme definitions")
+@router.get("/taxonomy/schemes")
 def list_schemes():
-    """Return welfare scheme metadata."""
     return {"schemes": SCHEMES}
 
 
 # ---------------------------------------------------------------------------
-# Document Intelligence
+# Document
 # ---------------------------------------------------------------------------
 
-@router.post("/process-document", summary="Extract fields from an uploaded welfare document")
+@router.post("/process-document")
 async def process_document_endpoint(
     file: UploadFile = File(...),
     doc_type: str = Form("Unknown"),
     scheme: Optional[str] = Form(None),
 ):
-    """
-    Upload a PDF or image (Aadhaar, bank passbook, job card, etc.).
-    Returns extracted fields and a map of question IDs that can be auto-answered.
-    """
     try:
         file_bytes = await file.read()
-        result = process_document(
+        return process_document(
             file_bytes=file_bytes,
             filename=file.filename or "upload",
             doc_type=doc_type,
-            scheme=scheme or None,
+            scheme=scheme,
         )
-        return result
     except Exception as e:
-        return {
-            "success": False,
-            "error": str(e),
-            "fields": {},
-            "auto_answers": {},
-            "doc_type": doc_type,
-            "questions_answered": 0,
-        }
+        return {"success": False, "error": str(e)}
