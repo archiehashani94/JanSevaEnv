@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "janseva-env"
+version = "1.0.0"
+description = "Indian welfare and pension grievance resolution RL environment"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.23.0",
+    "pydantic>=2.0.0",
+    "python-multipart>=0.0.6",
+    "pdfplumber>=0.10.0",
+    "PyMuPDF>=1.23.0",
+    "pytesseract>=0.3.10",
+    "Pillow>=10.0.0",
+    "openai>=1.0.0",
+]
+
+[project.scripts]
+janseva-env = "app.main:app"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
