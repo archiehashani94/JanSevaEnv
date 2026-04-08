@@ -2,6 +2,9 @@ from typing import Union
 from fastapi import APIRouter
 from typing import Union
 from app.models import AskQuestionAction, SubmitDiagnosisAction
+from typing import Union  
+
+def step(action: Union[AskQuestionAction, SubmitDiagnosisAction]):  
 """
 api.py
 FastAPI route definitions for JanSevaEnv.
