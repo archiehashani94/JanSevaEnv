@@ -19,9 +19,15 @@ dependencies = [
     "openai>=1.0.0",
 ]
 
-[project.scripts]
-janseva-env = "app.main:app"
-
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["app*"]
+
+[tool.openenv]
+name = "JanSevaEnv"
+version = "1.0.0"
+entry_point = "app.main:app"
+inference_script = "inference.py"
+spec = "openenv.yaml"
+docker = "Dockerfile"
+modes = ["docker", "python"]
