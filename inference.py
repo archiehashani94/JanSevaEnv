@@ -426,7 +426,7 @@ def main():
     # health check
     try:
         health = env_get("/health")
-        assert health.get("status") == "ok"
+        assert health.get("status") in ("ok", "healthy")
     except Exception as e:
         print("ERROR: JanSevaEnv server unreachable at {}: {}".format(ENV_BASE_URL, e),
               file=sys.stderr)

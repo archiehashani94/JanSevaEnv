@@ -194,18 +194,67 @@ def list_schemes():
 
 @router.get("/metadata")
 def get_metadata():
-    # TODO: Populate with actual metadata as required
-    return {"name": "JanSevaEnv", "description": "Indian welfare & pension grievance resolution RL environment."}
+    return {
+        "name": "JanSevaEnv",
+        "version": "1.0.0",
+        "description": "Indian welfare & pension grievance resolution RL environment.",
+        "tasks": [
+            {"id": tid, "grader": meta["grader"], "has_grader": meta["has_grader"]}
+            for tid, meta in TASK_META_MAP.items()
+        ],
+        "num_tasks": len(TASK_META_MAP),
+        "reset_endpoint": "/reset",
+        "step_endpoint": "/step",
+        "state_endpoint": "/state",
+    }
+
 
 @router.get("/schema")
 def get_schema():
-    # TODO: Populate with actual schema as required
-    return {"schema": "Not implemented"}
+    return {
+        "observation": {
+            "case_id": "str",
+            "grievance_text": "str",
+            "scheme": "str",
+            "step_number": "int",
+            "max_steps": "int",
+            "qa_history": "list[{question_id, question_text, answer}]",
+            "available_questions": "dict[str, str]",
+            "available_causes": "list[{id, label, resolution_id}]",
+            "available_resolutions": "list[{id, label}]",
+            "done": "bool",
+        },
+        "action": {
+            "ask_question": {
+                "action_type": "ask_question",
+                "question_id": "str",
+            },
+            "submit_diagnosis": {
+                "action_type": "submit_diagnosis",
+                "cause_id": "str",
+                "resolution_id": "str",
+            },
+        },
+        "reward": {
+            "step_reward": "float",
+            "cumulative_reward": "float",
+            "episode_score": "float | null",
+        },
+    }
+
 
 @router.get("/mcp")
 def get_mcp():
-    # TODO: Populate with actual MCP info as required
-    return {"mcp": "Not implemented"}
+    return {
+        "name": "JanSevaEnv",
+        "version": "1.0.0",
+        "description": "Indian welfare & pension grievance resolution RL environment.",
+        "tasks": list(TASK_META_MAP.keys()),
+        "graders": {tid: meta["grader"] for tid, meta in TASK_META_MAP.items()},
+        "inference_script": "inference.py",
+        "entry_point": "app.main:app",
+        "framework": "openenv",
+    }
 
 @router.post("/process-document")
 async def process_document_endpoint(
