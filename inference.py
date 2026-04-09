@@ -24,13 +24,19 @@ Environment variables (set these before running):
 
 import json
 import os
+import subprocess
 import sys
 import textwrap
 import urllib.error
 import urllib.request
 from typing import Any, Dict, List, Optional
 
-from openai import OpenAI
+# Auto-install openai if not available (evaluator may run in a clean env)
+try:
+    from openai import OpenAI
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "openai>=1.0.0", "-q"])
+    from openai import OpenAI
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIG  ← edit the defaults below OR set environment variables
