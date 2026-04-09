@@ -1,4 +1,36 @@
 name: JanSevaEnv
-
 entry_point: server.app:main
 inference_script: inference.py
+
+tasks:
+  - id: task1
+    name: PM-KISAN Payment Not Received
+    description: >
+      Easy task — farmer not receiving PM-KISAN installments.
+      Root causes span banking and KYC categories.
+      1-3 targeted questions are sufficient to reach a correct diagnosis.
+    grader: app.tasks.task1:grade
+    max_steps: 10
+    difficulty: easy
+    scheme: PM-KISAN
+
+  - id: task2
+    name: Old Age / Widow Pension Stopped
+    description: >
+      Medium task — elderly or widow beneficiary's monthly pension stopped.
+      Causes span pension, banking, KYC, and administrative categories.
+      Requires 4-7 targeted questions.
+    grader: app.tasks.task2:grade
+    max_steps: 15
+    difficulty: medium
+    scheme: OAP
+
+  - id: task3
+    name: MGNREGA Wages & NFSA-PDS Grievances
+    description: >
+      Hard task — MGNREGA wages (5-stage pipeline) and NFSA-PDS ration failures.
+      Cases include deliberate misleading signals requiring deep investigation.
+    grader: app.tasks.task3:grade
+    max_steps: 20
+    difficulty: hard
+    scheme: MGNREGA
