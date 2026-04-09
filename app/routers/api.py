@@ -147,6 +147,25 @@ def list_schemes():
 # Document
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# OpenEnv Hackathon required endpoints
+# ---------------------------------------------------------------------------
+
+@router.get("/metadata")
+def get_metadata():
+    # TODO: Populate with actual metadata as required
+    return {"name": "JanSevaEnv", "description": "Indian welfare & pension grievance resolution RL environment."}
+
+@router.get("/schema")
+def get_schema():
+    # TODO: Populate with actual schema as required
+    return {"schema": "Not implemented"}
+
+@router.get("/mcp")
+def get_mcp():
+    # TODO: Populate with actual MCP info as required
+    return {"mcp": "Not implemented"}
+
 @router.post("/process-document")
 async def process_document_endpoint(
     file: UploadFile = File(...),

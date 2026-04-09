@@ -20,6 +20,7 @@ TASK_META = {
     "scheme": "OAP",
     "max_steps": 15,
     "num_cases": 12,
+    "grader": "rule_based",
 }
 
 TASK_CASES = ["T2_001", "T2_002", "T2_003", "T2_004", "T2_005",

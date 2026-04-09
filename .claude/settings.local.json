@@ -16,7 +16,9 @@
       "Bash(cmd:*)",
       "Bash(powershell:*)",
       "Bash(curl -s -X POST http://127.0.0.1:8000/process-document -F 'file=@/c/web development projects/JanSevaEnv/app/data/taxonomy.json;type=application/pdf' -F doc_type=Other)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(python -c ':*)",
+      "Bash(pip show:*)"
     ]
   }
 }

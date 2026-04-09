@@ -26,4 +26,4 @@ if _STATIC_DIR.exists():
 # Health check (IMPORTANT for hackathon)
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "healthy"}
