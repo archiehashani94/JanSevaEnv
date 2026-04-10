@@ -119,47 +119,6 @@ def get_task(task_id: str):
     return TASK_META_MAP[task_id]
 
 
-# Expose a /tasks/{task_id}/grade endpoint
-from fastapi import Body
-import importlib
-
-@router.post("/tasks/{task_id}/grade")
-def grade_task(task_id: str,
-               submitted_cause: str = Body(...),
-               submitted_resolution: str = Body(...),
-               questions_asked: list[str] = Body(...),
-               steps_used: int = Body(...),
-               true_cause: str = Body(...),
-               true_resolution: str = Body(...)):
-    if task_id not in TASK_META_MAP:
-        raise HTTPException(status_code=404, detail="Task not found")
-    # Dynamically import the grade function from the correct task module
-    try:
-        grade_func = None
-        if task_id == "task1":
-            mod = importlib.import_module("app.tasks.task1")
-            grade_func = mod.grade
-        elif task_id == "task2":
-            mod = importlib.import_module("app.tasks.task2")
-            grade_func = mod.grade
-        elif task_id == "task3":
-            mod = importlib.import_module("app.tasks.task3")
-            grade_func = mod.grade
-        else:
-            raise HTTPException(status_code=404, detail="No grader for this task")
-        score = grade_func(
-            submitted_cause=submitted_cause,
-            submitted_resolution=submitted_resolution,
-            questions_asked=questions_asked,
-            steps_used=steps_used,
-            true_cause=true_cause,
-            true_resolution=true_resolution,
-        )
-        return {"score": score}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Grader error: {str(e)}")
-
-
 # ---------------------------------------------------------------------------
 # Taxonomy
 # ---------------------------------------------------------------------------
