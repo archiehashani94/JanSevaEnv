@@ -4,7 +4,7 @@ FastAPI route definitions for JanSevaEnv.
 All routes delegate directly to the JanSevaEnv environment instance.
 """
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Header, Depends
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from typing import Optional, Union  # ✅ FIXED (moved here)
 
 from app.models import (
@@ -27,17 +27,8 @@ from app.document_extractor import process_document
 
 router = APIRouter()
 
-# Dictionary mapping session IDs to unique environment instances
-_env_sessions: dict[str, JanSevaEnv] = {}
-
-def get_env(x_session_id: str = Header(default="default")) -> JanSevaEnv:
-    # A basic guard to prevent unbounded growth in a long-running instance
-    if len(_env_sessions) > 1000:
-        _env_sessions.clear()
-    
-    if x_session_id not in _env_sessions:
-        _env_sessions[x_session_id] = JanSevaEnv()
-    return _env_sessions[x_session_id]
+# Single shared environment instance
+_env = JanSevaEnv()
 
 TASK_META_MAP = {
     "task1": T1_META,
@@ -68,22 +59,22 @@ def _detect_scheme(text: str) -> str:
 
 
 @router.post("/reset", response_model=Observation)
-def reset_episode(request: Optional[ResetRequest] = None, env: JanSevaEnv = Depends(get_env)):
+def reset_episode(request: Optional[ResetRequest] = None):
     try:
         task_id = (request.task_id if request and request.task_id else None) or "task1"
         case_id = request.case_id if request else None
-        return env.reset(task_id=task_id, case_id=case_id)
+        return _env.reset(task_id=task_id, case_id=case_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.post("/reset-custom", response_model=Observation)
-def reset_custom(request: CustomResetRequest, env: JanSevaEnv = Depends(get_env)):
+def reset_custom(request: CustomResetRequest):
     scheme = request.scheme or _detect_scheme(request.grievance_text)
     if scheme not in SCHEMES:
         scheme = "PM-KISAN"
     try:
-        return env.reset_custom(
+        return _env.reset_custom(
             grievance_text=request.grievance_text, scheme=scheme
         )
     except Exception as e:
@@ -97,17 +88,17 @@ def detect_scheme_endpoint(text: str):
 
 # ✅ FIXED STEP FUNCTION
 @router.post("/step", response_model=StepResult)
-def step(action: Union[AskQuestionAction, SubmitDiagnosisAction], env: JanSevaEnv = Depends(get_env)):
+def step(action: Union[AskQuestionAction, SubmitDiagnosisAction]):
     try:
-        return env.step(action)
+        return _env.step(action)
     except RuntimeError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/state", response_model=State)
-def get_state(env: JanSevaEnv = Depends(get_env)):
+def get_state():
     try:
-        return env.state()
+        return _env.state()
     except RuntimeError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
