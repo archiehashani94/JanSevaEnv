@@ -89,5 +89,3 @@ class TaskInfo(BaseModel):
     scheme: str
     max_steps: int
     num_cases: int
-    grader: Optional[str] = None       # e.g. "app.tasks.task1:grade"
-    has_grader: bool = False

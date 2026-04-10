@@ -140,43 +140,14 @@ def load_cause_map():
     return result
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# LLM AGENT
-# ─────────────────────────────────────────────────────────────────────────────
+# SYSTEM PROMPT for LLM
+SYSTEM_PROMPT = "You are a helpful assistant for the JanSevaEnv grievance redressal system. Answer as concisely and accurately as possible."
 
-SYSTEM_PROMPT = textwrap.dedent("""
-    You are an expert welfare grievance investigator for Indian government schemes
-    (PM-KISAN, OAP, WAP, DAP, MGNREGA, NFSA-PDS).
-
-    Your task: identify the ROOT CAUSE of a beneficiary's grievance by asking
-    diagnostic questions, then submit a diagnosis.
-
-    At each step you will receive:
-    - The grievance description
-    - Available questions (as JSON: {question_id: question_text})
-    - Available causes (as JSON list)
-    - Q&A history so far
-
-    Rules:
-    1. If you want to ask a question, reply with EXACTLY:
-       ask_question:<question_id>
-       Example: ask_question:Q06
-
-    2. If you are confident of the root cause, reply with EXACTLY:
-       submit_diagnosis:<cause_id>:<resolution_id>
-       Example: submit_diagnosis:aadhaar_not_seeded:seed_aadhaar
-
-    3. Ask the most informative question first. Do not ask redundant questions.
-    4. After 3-5 questions you should have enough information to diagnose.
-    5. Reply with ONLY the action string — no explanation, no extra text.
-""").strip()
-
-
+# Build user prompt for LLM
 def build_user_prompt(obs, cause_map):
-    # type: (dict, Dict[str, dict]) -> str
-    available_questions = obs.get("available_questions", {})
     available_causes = obs.get("available_causes", [])
     qa_history = obs.get("qa_history", [])
+    available_questions = obs.get("available_questions", {})
 
     history_lines = []
     for qa in qa_history:
@@ -420,34 +391,3 @@ def run_episode(client, cause_map):
 # ENTRY POINT
 # ─────────────────────────────────────────────────────────────────────────────
 
-def main():
-    # type: () -> None
-
-    if not HF_TOKEN:
-        print(
-            "WARNING: HF_TOKEN is not set. LLM calls will fail. "
-            "Set it with: export HF_TOKEN=hf_...",
-            file=sys.stderr,
-        )
-
-    # health check
-    try:
-        health = env_get("/health")
-        assert health.get("status") == "healthy"
-    except Exception as e:
-        print("ERROR: JanSevaEnv server unreachable at {}: {}".format(ENV_BASE_URL, e),
-              file=sys.stderr)
-        sys.exit(1)
-
-    # OpenAI client pointed at HuggingFace router (or any compatible endpoint)
-    client = OpenAI(
-        base_url=API_BASE_URL,
-        api_key=HF_TOKEN or "no-token",
-    )
-
-    cause_map = load_cause_map()
-    run_episode(client, cause_map)
-
-
-if __name__ == "__main__":
-    main()

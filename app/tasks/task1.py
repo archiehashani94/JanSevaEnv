@@ -20,8 +20,7 @@ TASK_META = {
     "scheme": "PM-KISAN",
     "max_steps": 10,
     "num_cases": 12,
-    "grader": "app.tasks.task1:grade",
-    "has_grader": True,
+    "grader": "rule_based",
 }
 
 TASK_CASES = ["T1_001", "T1_002", "T1_003", "T1_004", "T1_005",

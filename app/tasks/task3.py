@@ -26,8 +26,7 @@ TASK_META = {
     "scheme": "MGNREGA",
     "max_steps": 20,
     "num_cases": 11,
-    "grader": "app.tasks.task3:grade",
-    "has_grader": True,
+    "grader": "rule_based",
 }
 
 TASK_CASES = ["T3_001", "T3_002", "T3_003", "T3_004", "T3_005",
