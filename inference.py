@@ -391,3 +391,37 @@ def run_episode(client, cause_map):
 # ENTRY POINT
 # ─────────────────────────────────────────────────────────────────────────────
 
+<<<<<<< HEAD
+=======
+def main():
+    # type: () -> None
+
+    if not HF_TOKEN:
+        print(
+            "WARNING: HF_TOKEN is not set. LLM calls will fail. "
+            "Set it with: export HF_TOKEN=hf_...",
+            file=sys.stderr,
+        )
+
+    # health check
+    try:
+        health = env_get("/health")
+        assert health.get("status") == "ok"
+    except Exception as e:
+        print("ERROR: JanSevaEnv server unreachable at {}: {}".format(ENV_BASE_URL, e),
+              file=sys.stderr)
+        sys.exit(1)
+
+    # OpenAI client pointed at HuggingFace router (or any compatible endpoint)
+    client = OpenAI(
+        base_url=API_BASE_URL,
+        api_key=HF_TOKEN or "no-token",
+    )
+
+    cause_map = load_cause_map()
+    run_episode(client, cause_map)
+
+
+if __name__ == "__main__":
+    main()
+>>>>>>> parent of d86e355 (fix: expose graders in /tasks API + real /metadata /schema /mcp + health check)
