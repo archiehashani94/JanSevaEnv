@@ -27,14 +27,3 @@ if _STATIC_DIR.exists():
 @app.get("/health")
 def health():
     return {"status": "healthy"}
-
-
-def main():
-    """Entry point for OpenEnv multi-mode deployment.
-    The OpenEnv validator requires the entry_point to reference a callable
-    named 'main', not the ASGI app object directly.
-    """
-    import uvicorn
-    import os
-    port = int(os.getenv("PORT", 7860))
-    uvicorn.run("app.main:app", host="0.0.0.0", port=port)

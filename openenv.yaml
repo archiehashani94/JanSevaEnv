@@ -1,5 +1,5 @@
 name: JanSevaEnv
-entry_point: app.main:main
+entry_point: app.main:app
 inference_script: inference.py
 
 tasks:
