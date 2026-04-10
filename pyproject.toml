@@ -34,4 +34,4 @@ docker = "Dockerfile"
 modes = ["docker", "python"]
 
 [project.scripts]
-server = "server.app:main"
+server = "app.main:app"

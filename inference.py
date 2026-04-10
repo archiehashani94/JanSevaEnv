@@ -38,6 +38,8 @@ except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "openai>=1.0.0", "-q"])
     from openai import OpenAI
 
+import uuid
+
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIG  ← edit the defaults below OR set environment variables
 # ─────────────────────────────────────────────────────────────────────────────
@@ -56,6 +58,7 @@ TASK_ID  = os.getenv("TASK_ID",  "task1")
 CASE_ID  = os.getenv("CASE_ID",  "")       # leave blank for random case
 BENCHMARK = "janseva-env"
 MAX_STEPS = 10
+SESSION_ID = os.getenv("SESSION_ID", str(uuid.uuid4()))
 
 # ─────────────────────────────────────────────────────────────────────────────
 # LOGGING  (exact hackathon format)
@@ -95,7 +98,11 @@ def log_end(success, steps, score, rewards):
 
 def _env_headers():
     # type: () -> Dict[str, str]
-    return {"Content-Type": "application/json", "Accept": "application/json"}
+    return {
+        "Content-Type": "application/json", 
+        "Accept": "application/json",
+        "X-Session-ID": SESSION_ID
+    }
 
 
 def env_get(path):
@@ -426,7 +433,7 @@ def main():
     # health check
     try:
         health = env_get("/health")
-        assert health.get("status") in ("ok", "healthy")
+        assert health.get("status") == "healthy"
     except Exception as e:
         print("ERROR: JanSevaEnv server unreachable at {}: {}".format(ENV_BASE_URL, e),
               file=sys.stderr)
