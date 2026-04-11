@@ -391,8 +391,6 @@ def run_episode(client, cause_map):
 # ENTRY POINT
 # ─────────────────────────────────────────────────────────────────────────────
 
-<<<<<<< HEAD
-=======
 def main():
     # type: () -> None
 
@@ -406,7 +404,7 @@ def main():
     # health check
     try:
         health = env_get("/health")
-        assert health.get("status") == "ok"
+        assert health.get("status") in ("ok", "healthy")
     except Exception as e:
         print("ERROR: JanSevaEnv server unreachable at {}: {}".format(ENV_BASE_URL, e),
               file=sys.stderr)
@@ -424,4 +422,3 @@ def main():
 
 if __name__ == "__main__":
     main()
->>>>>>> parent of d86e355 (fix: expose graders in /tasks API + real /metadata /schema /mcp + health check)
