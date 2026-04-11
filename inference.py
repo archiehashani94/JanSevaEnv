@@ -293,8 +293,10 @@ def parse_action(action_str, obs):
 # EPISODE RUNNER
 # ─────────────────────────────────────────────────────────────────────────────
 
-def run_episode(client, cause_map):
-    # type: (OpenAI, Dict[str, dict]) -> None
+def run_episode(client, cause_map, task_id=None):
+    # type: (OpenAI, Dict[str, dict], Optional[str]) -> None
+
+    task_id = task_id or TASK_ID
 
     rewards    = []   # type: List[float]
     steps_taken = 0
@@ -303,19 +305,20 @@ def run_episode(client, cause_map):
     info       = {}   # type: dict
 
     # ── reset ─────────────────────────────────────────────────────────────────
-    reset_payload = {"task_id": TASK_ID}
+    reset_payload = {"task_id": task_id}
     if CASE_ID:
         reset_payload["case_id"] = CASE_ID
 
     obs = env_post("/reset", reset_payload)
     case_id = obs["case_id"]
 
-    log_start(task="{}-{}".format(TASK_ID, case_id), env=BENCHMARK, model=MODEL_NAME)
+    log_start(task="{}-{}".format(task_id, case_id), env=BENCHMARK, model=MODEL_NAME)
 
     done = obs.get("done", False)
+    max_steps = obs.get("max_steps", MAX_STEPS)
 
     try:
-        for step in range(1, MAX_STEPS + 1):
+        for step in range(1, max_steps + 1):
             if done:
                 break
 
@@ -323,7 +326,7 @@ def run_episode(client, cause_map):
             action_str = get_llm_action(client, obs, cause_map, step)
 
             # if model hasn't diagnosed yet but we're at last step, force diagnose
-            if step == MAX_STEPS and not action_str.startswith("submit_diagnosis:"):
+            if step == max_steps and not action_str.startswith("submit_diagnosis:"):
                 action_str = _fallback_action(
                     dict(obs, available_questions={}),  # empty questions forces diagnose
                     cause_map,
@@ -417,7 +420,11 @@ def main():
     )
 
     cause_map = load_cause_map()
-    run_episode(client, cause_map)
+
+    # If TASK_ID is explicitly set run only that task, otherwise run all 3 for evaluation
+    tasks_to_run = [TASK_ID] if os.getenv("TASK_ID") else ["task1", "task2", "task3"]
+    for tid in tasks_to_run:
+        run_episode(client, cause_map, task_id=tid)
 
 
 if __name__ == "__main__":
