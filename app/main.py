@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pathlib import Path
 from app.routers.api import router
+from app.models import Action, Observation, State
 
 app = FastAPI(
     title="JanSevaEnv",
@@ -23,10 +24,51 @@ if _STATIC_DIR.exists():
     def serve_frontend():
         return FileResponse(str(_STATIC_DIR / "index.html"))
 
-# Health check (IMPORTANT for hackathon)
+# Health check
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
+
+# OpenEnv runtime API: metadata
+@app.get("/metadata")
+def metadata():
+    return {
+        "name": "JanSevaEnv",
+        "description": (
+            "Indian welfare and pension grievance resolution RL environment. "
+            "The agent investigates beneficiary grievances across PM-KISAN, OAP/WAP, "
+            "MGNREGA, NFSA-PDS schemes by asking diagnostic questions and submitting a root-cause diagnosis."
+        ),
+        "version": "1.0.0",
+        "tasks": ["task1", "task2", "task3"],
+    }
+
+
+# OpenEnv runtime API: schema
+@app.get("/schema")
+def schema():
+    return {
+        "action": Action.model_json_schema(),
+        "observation": Observation.model_json_schema(),
+        "state": State.model_json_schema(),
+    }
+
+
+# OpenEnv runtime API: MCP (JSON-RPC stub)
+@app.post("/mcp")
+async def mcp(request: Request):
+    body = {}
+    try:
+        body = await request.json()
+    except Exception:
+        pass
+    return JSONResponse({
+        "jsonrpc": "2.0",
+        "id": body.get("id"),
+        "result": {"name": "JanSevaEnv", "tools": []},
+    })
+
 
 def main():
     import uvicorn

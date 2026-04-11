@@ -27,11 +27,11 @@ include = ["app*"]
 [tool.openenv]
 name = "JanSevaEnv"
 version = "1.0.0"
-entry_point = "app.main:app"
+entry_point = "server.app:main"
 inference_script = "inference.py"
 spec = "openenv.yaml"
 docker = "Dockerfile"
 modes = ["docker", "python"]
 
 [project.scripts]
-server = "app.main:app"
+server = "server.app:main"
