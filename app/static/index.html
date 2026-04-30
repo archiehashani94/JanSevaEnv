@@ -366,10 +366,10 @@
     width: 300px; min-width: 300px;
     border-left: 1px solid var(--border);
     background: var(--surface);
-    display: flex; flex-direction: column; overflow: hidden;
+    display: flex; flex-direction: column; overflow-y: auto;
   }
 
-  .ap-section { padding: 16px; border-bottom: 1px solid var(--border); }
+  .ap-section { padding: 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
   .ap-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 12px; }
 
   .q-list { display:flex; flex-direction:column; gap:6px; overflow-y:auto; max-height:230px; }
@@ -1766,8 +1766,13 @@ async function askQuestion(qid, qtext, customAnswer){
       else qEl.classList.add('asked');
     }
 
-    // re-score causes after each question
+    // re-score causes after each question and auto-select top match
     filterCauseDropdown(document.getElementById('cause-search').value);
+    const scores = scoreCauses();
+    const topCause = allCausesForPicker
+      .filter(function(c){ return scores[c.id]; })
+      .sort(function(a,b){ return (scores[b.id]||0)-(scores[a.id]||0); })[0];
+    if(topCause && !selectedCauseId){ selectCause(topCause.id, topCause.label); }
 
     // Use the text the backend recorded in qa_history as the authoritative source
     const lastQA = obs.qa_history && obs.qa_history.length > 0
