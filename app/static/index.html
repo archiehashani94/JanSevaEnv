@@ -1793,7 +1793,7 @@ async function askQuestion(qid, qtext, customAnswer){
       const label = isCustom ? 'Custom · Step '+obs.step_number+'/'+obs.max_steps
                               : 'Case '+obs.case_id+' · Step '+obs.step_number+'/'+obs.max_steps;
       document.getElementById('ep-status').textContent = label;
-      if(obs.done){ episodeDone=true; setFlowStep(4); document.getElementById('btn-submit').disabled=true; }
+      if(obs.done && episodeDone){ setFlowStep(4); document.getElementById('btn-submit').disabled=true; }
     }, isCustom ? 200 : 550);
   }catch(e){
     const t=document.getElementById('typing-tmp'); if(t) t.remove();
@@ -1803,9 +1803,18 @@ async function askQuestion(qid, qtext, customAnswer){
 
 async function submitDiagnosis(){
   const cause_id = document.getElementById('sel-cause').value;
-  const resolution_id = document.getElementById('sel-resolution').value;
   if(!cause_id){ showToast('Select a root cause first','error'); return; }
-  if(!resolution_id){ showToast('Resolution not filled — re-select the cause','error'); return; }
+  // resolve resolution_id from map, then from picker, then from select
+  let resolution_id = document.getElementById('sel-resolution').value;
+  if(!resolution_id){
+    const mapInfo = causeResolutionMap[cause_id];
+    if(mapInfo) resolution_id = mapInfo.id || mapInfo.resolution_id || '';
+  }
+  if(!resolution_id){
+    const picked = allCausesForPicker.find(function(c){ return c.id===cause_id; });
+    if(picked) resolution_id = picked.resolution_id || '';
+  }
+  if(!resolution_id){ showToast('Resolution not found — re-select the cause','error'); return; }
   if(episodeDone){ showToast('Episode already ended','error'); return; }
   if(!episodeActive){ showToast('No active episode','error'); return; }
 
